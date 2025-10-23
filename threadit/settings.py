@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'core',  # newly added app for main 'core' logic
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
