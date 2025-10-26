@@ -15,8 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+# 1. You MUST import the 'include' function
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # 2. Add this new path rule.
+    # This tells Django: "For any URL that matches the pattern '' 
+    # (which is the homepage), pass the request over to the 
+    # file specified in 'core.urls' to be handled."
+    path('', include('core.urls')),
+
 ]

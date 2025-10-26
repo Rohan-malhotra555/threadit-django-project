@@ -17,7 +17,7 @@ class Post(models.Model):
 
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True) # A post can have a title but no text content (e.g., a link post)
-    create_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     # This is the most important part!
     # It creates a many-to-one relationship.
