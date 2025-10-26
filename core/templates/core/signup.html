@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up for Threadit</title>
+    <style>
+        /* CSS rules to style the page elements for a clean look */
+        body {
+            font-family: sans-serif;
+            max-width: 800px; /* Limits content width */
+            margin: 20px auto; /* Centers the content block */
+            padding: 15px;
+            background-color: #f4f4f4; /* Light grey background */
+        }
+        .form-container {
+            background-color: #fff; /* White box for the form */
+            border: 1px solid #ddd; /* Light grey border */
+            border-radius: 5px; /* Rounded corners */
+            padding: 20px; /* Space inside the box */
+        }
+        .form-container h2 {
+            margin: 0 0 15px 0; /* Space below the heading */
+        }
+        form p {
+            margin-bottom: 10px; /* Space between form fields rendered by .as_p */
+        }
+        form label {
+            display: block; /* Label appears above the input */
+            margin-bottom: 5px; /* Space below the label */
+            font-weight: bold; /* Makes label text bold */
+        }
+        form input {
+            width: 95%; /* Input box fills the container */
+            padding: 8px; /* Space inside the input box */
+            border: 1px solid #ccc; /* Input box border */
+            border-radius: 4px; /* Rounded corners */
+        }
+        button {
+            background-color: #007bff; /* Blue button background */
+            color: white; /* White button text */
+            padding: 10px 15px; /* Button size */
+            border: none; /* No default border */
+            border-radius: 4px; /* Rounded corners */
+            cursor: pointer; /* Hand cursor on hover */
+        }
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+
+        <h2>Sign Up for Threadit</h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">Sign Up</button>
+
+        </form> </div> </body>
+</html>
+
+<!--
+Here's a brief explanation of each line in the `<body>` section:
+
+* `<body>`: Marks the beginning of the main visible content of the HTML page.
+* `<div class="form-container">`: Starts a `div` element (a container) that groups the form content and applies the `.form-container` CSS styles (like the white background and border).
+* `<h2>Sign Up for Threadit</h2>`: Displays the main heading for the form.
+* `<form method="POST">`: Defines the start of the HTML form. `method="POST"` specifies that the browser should **send** data to the server when the form is submitted.
+* `{% csrf_token %}`: **Crucial Django security tag**. Renders a hidden input field with a unique token to prevent Cross-Site Request Forgery attacks. It's mandatory for `POST` forms.
+* `{{ form.as_p }}`: **Django magic**. Automatically renders all the fields (Username, Email, Passwords) from the `form` object (passed from your view) as HTML inputs, each wrapped in `<p>` tags for structure. It also handles displaying errors.
+* `<button type="submit">Sign Up</button>`: Creates the clickable button. `type="submit"` tells the browser that clicking this button should package up the data in the parent `<form>` and send it according to the form's `method` (POST).
+* `</form>`: Marks the end of the HTML form.
+* `</div>`: Marks the end of the container `div`.
+* `</body>`: Marks the end of the main visible content of the HTML page.
+-->

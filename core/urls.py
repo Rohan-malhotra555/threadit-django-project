@@ -17,4 +17,24 @@ urlpatterns = [
     # This is a unique, human-readable name for this URL. It lets us
     # refer to this link easily in our HTML templates without hard-coding the URL.
     path('', views.home, name='home'),
+
+    
+    # Path for our new sign-up page
+    #
+    # 'signup/': This is the "address." It means when a user
+    #             visits http://127.0.0.1:8000/signup/
+    #             this rule will match.
+    #
+    # views.signup: This is the "brain." We are telling Django,
+    #                "When this URL is visited, you must call the
+    #                function named 'signup' inside our core/views.py file."
+    #                (We haven't created this function yet, but we will in the next step!)
+    #
+    # name='signup': This is the "nickname." It gives this URL a
+    #                unique name, so we can refer to it easily
+    #                from our HTML templates (e.g., <a href="{% url 'signup' %}">Sign Up</a>).
+
+    path('signup/', views.signup, name='signup'), 
+
+
 ]
