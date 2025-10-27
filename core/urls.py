@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views  # This means "from the same directory, import the views.py file"
+from django.contrib.auth import views as auth_views # Import Django's built-in authentication views
+
 
 # This list holds all the URL patterns for just this one app
 urlpatterns = [
@@ -36,5 +38,16 @@ urlpatterns = [
 
     path('signup/', views.signup, name='signup'), 
 
+    # Path for the login page
+    # We use Django's built-in LoginView.
+    # We need to tell it which template to use for the login form.
+    # .as_view is used to convert the class LoginView to a callable function for the url pattern.
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+
+    # Path for the logout action
+    # We use Django's built-in LogoutView.
+    # By default, it redirects to the LOGOUT_REDIRECT_URL setting (or admin page).
+    # We don't need a template for logout itself, it's just an action.
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
 ]
