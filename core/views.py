@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
-from .models import Post
+from django.shortcuts import render, redirect, get_object_or_404 # added get_object_or_404 for the specific community search.
+from .models import Post, Community  # added Community for the specific community search
 
 from django.contrib.auth import login
 from .forms import SignUpForm # <-- Import our new form
+
+
 
 def home(request):
 

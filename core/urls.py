@@ -50,4 +50,25 @@ urlpatterns = [
     # We don't need a template for logout itself, it's just an action.
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
+    # Path for the community detail page (Dynamic URL)
+    #
+    # 'community/<str:community_name>/': This is the pattern.
+    #   - 'community/': Matches the literal text "community/".
+    #   - '<str:community_name>': This is the DYNAMIC part.
+    #     - Angle brackets `< >` signal a variable part.
+    #     - `str:` tells Django to expect a string (text).
+    #     - `community_name`: This is the NAME we give to the variable
+    #       that will capture whatever text is in this part of the URL
+    #       (e.g., "python", "django").
+    #   - '/': Matches the final slash.
+    #
+    # views.community_detail: This tells Django to call the function named
+    #                         'community_detail' in our `views.py` file
+    #                         when this pattern matches. (We'll create this next).
+    #
+    # name='community_detail': The unique nickname for this URL pattern.
+
+    path('community/<str:community_name>/', views.community_detail, name='community_detail'),
+
+
 ]
