@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Here is your updated `README.md` file.
 
 I've added **new sections (5, 6, 7, 8, 9)** to cover everything we did between creating the first app and starting the community detail page. I also updated the **Git & GitHub Workflow** section (now \#10) with our specific troubleshooting steps, just as you asked.
@@ -10,6 +11,13 @@ This is your complete revision guide.
 
 This is a full-stack content aggregation and discussion platform built with Python and Django. This project is my primary focus for mastering backend development and building a professional portfolio piece.
 
+=======
+
+# Threadit: A Python/Django Content Platform
+
+This is a full-stack content aggregation and discussion platform built with Python and Django. This project is my primary focus for mastering backend development and building a professional portfolio piece.
+
+>>>>>>> 9f59f3d4ea543d0defaff9df5d60e39ee0070558
 **Status:** Currently in development (Building core features).
 
 -----
@@ -246,4 +254,8 @@ This is my personal cheatsheet to track all the commands and concepts I've learn
     1.  **Commit** your local work first (`git commit ...`).
     2.  **Pull** from the remote to merge any new changes (`git pull origin main`).
     3.  **Fix Conflicts** (if any). If Git opens the Vim editor for a merge message, just type `:wq` and press Enter to save and quit.
+<<<<<<< HEAD
     4.  **Push** your merged work (`git push origin main`).\*
+=======
+    4.  **Push** your merged work (`git push origin main`).\*
+>>>>>>> 9f59f3d4ea543d0defaff9df5d60e39ee0070558
