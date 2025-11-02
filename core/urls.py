@@ -76,5 +76,12 @@ urlpatterns = [
     # we will create called 'create_post'.
     path('create-post/', views.create_post, name='create_post'),
 
+    # Path for the Post Detail page
+    # This is a dynamic URL. <int:post_id> is a "path converter".
+    # It captures the number from the URL (e.g., '1', '2') as an
+    # integer and passes it to the view as a variable named 'post_id'.
+    path('post/<int:post_id>/', views.post_detail, name='post_detail'),
+
+
 
 ]

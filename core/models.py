@@ -38,3 +38,44 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+# Creating a new model for the comment functionality
+
+class Comment(models.Model):
+    # This is the actual text content of the comment.
+    content = models.TextField()
+
+    # This timestamp will be set automatically when the comment is created.
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # This links the Comment to the User who wrote it.
+    # If a User is deleted, all their comments are deleted too.
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # This links the Comment to the Post it's replying to.
+    # If a Post is deleted, all its comments are deleted too.
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    def __str__(self):
+        # This will make the admin panel show the first 50 characters
+        # of the comment, so it's easy to identify.
+        # on the first 50 characters will be shown as the 'name'.
+        return self.content[:50]
+    
+
+
+"""
+User is a class that is there to maintain the information 
+about the users information. It is used to retrieve information
+and for this session id purposes.
+it is the actual main table to store user information given by 
+django itself, we don't create it.
+
+now the User that we imported from ..auth.models import User,
+this is the same user model that we are talking about in the
+above line.
+
+now, when we say post.author.username, it actually means post's 
+author which is the link to the User model, now we want user's 
+username so the chain follows up.
+"""

@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms    
 
-from .models import Post # importing Post to be used for the model in the Posting functionality
+from .models import Post, Comment # importing Post to be used for the model in the Posting functionality
 
 """
 You have two classes because they do two different jobs:
@@ -45,7 +45,6 @@ class PostForm(forms.ModelForm):
         fields = ['title', 'content', 'community']
 
 """
-Here's a refined version of that line:
 
 `forms.ModelForm` is a **smart form builder** that automatically 
 creates a complete form by reading the "blueprint" of your `Post` model. 
@@ -53,3 +52,21 @@ It generates all the correct fields, validation, and a `.save()` method
 based on your model's structure.
 """
 
+
+# Creating a new form for the comment section.
+
+class CommentForm(forms.ModelForm):
+    """
+    This is the form for adding a new Comment.
+    """
+    class Meta:
+        # Tell the form which model to use
+        model = Comment
+        
+        # Tell the form which fields to show.
+        # We only want the user to type in the 'content'.
+        # The 'author' and 'post' will be set automatically
+        # in the view function.
+        fields = ['content']
+
+        

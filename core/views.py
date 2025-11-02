@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404 # added get_object_or_404 for the specific community search.
-from .models import Post, Community  # added Community for the specific community search
+from .models import Post, Community, Comment  # added Community for the specific community search
 
 from django.contrib.auth import login
-from .forms import SignUpForm, PostForm # <-- Import our new form
+from .forms import SignUpForm, PostForm, CommentForm # <-- Import our new form
 
 # This "decorator" is what we'll use to protect the view
 from django.contrib.auth.decorators import login_required 
@@ -155,6 +155,65 @@ def create_post(request):
     
     # Render the 'create_post.html' template (we'll make this next)
     return render(request, 'core/create_post.html', context)
+
+
+
+def post_detail(request, post_id):
+    """
+    Shows a single post, its comments, and handles new comment submissions.
+    """
+    # 1. Get the specific post object using the 'post_id' from the URL.
+    #    If the post doesn't exist, this will show a 404 page.
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 2. Get all comments related to this *one* post.
+    #    We filter the Comment model where the 'post' field
+    #    matches our 'post' object. We order by the oldest first.
+    comments = Comment.objects.filter(post=post).order_by('created_at')
+    
+    # 3. Create a blank instance of our comment form.
+    #    This will be used to render the "Add a comment" box.
+    comment_form = CommentForm()
+
+    # 4. Handle the 'POST' request (when a user submits a comment)
+    if request.method == 'POST':
+        # This part will ONLY run if the user submits the form.
+        # We fill the form instance with the submitted data.
+        comment_form = CommentForm(request.POST)
+        
+        if comment_form.is_valid():
+            # Form is valid. Create the comment object in memory.
+            new_comment = comment_form.save(commit=False)
+            
+            # Assign the correct post and author (the logged-in user)
+            new_comment.post = post
+            new_comment.author = request.user
+            
+            # Now save the completed comment to the database.
+            new_comment.save()
+            
+            # Redirect back to this *same page* (the post detail page).
+            # This is a common pattern to show the new comment.
+            return redirect('post_detail', post_id=post.id)
+            
+    # 5. Prepare the context dictionary for the template
+    context = {
+        'post': post,
+        'comments': comments,
+        'comment_form': comment_form,
+    }
+
+    # 6. Render the template
+    return render(request, 'core/post_detail.html', context)
+
+
+
+        
+
+
+
+
+
 
 
 

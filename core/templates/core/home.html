@@ -104,7 +104,9 @@
               This line tells Django: "Get the current 'post' from the loop
               and print its 'title' field."
             -->
-            <h2>{{ post.title }}</h2>
+            <h2>
+                <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+            </h2>
 
             <p class="post-meta">
                 Posted in <a href=" {% url 'community_detail' post.community.name %}">

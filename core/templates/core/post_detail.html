@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }}</title>
+
+    <style>
+
+        body { 
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #f4f4f4;
+        }
+        .post { 
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .post h1 { /* Changed from h2 for the main post */
+            margin: 0 0 10px 0;
+        }
+        .post-meta { 
+            font-size: 0.9em;
+            color: #777;
+        }
+        
+        /* Styles for the comment section */
+        .comment-form {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        form p { margin-bottom: 10px; }
+        form label { display: block; margin-bottom: 5px; font-weight: bold; }
+        form textarea { 
+            width: 95%; 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px;
+            height: 80px;
+        }
+        button { 
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        /* Styles for the list of comments */
+        .comment-list {
+            margin-top: 20px;
+        }
+        .comment {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #007bff;
+        }
+        .comment-meta {
+            font-size: 0.8em;
+            color: #555;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <p><a href="{% url 'home' %}">&laquo; Back to all Posts</a></p>
+    
+    <div class="post">
+
+        <h1>{{ post.title }}</h1>
+
+        <p class="post-meta">
+            Posted by {{ post.author.username }}
+            in <a href="{% url 'community_detail' post.community.name %}">{{ post.community.name }}</a>
+            on {{ post.created_at|date:"F d, Y" }}
+        </p>
+
+        <p>{{ post.content }}</p>
+    </div>
+
+
+    {% if user.is_authenticated %}
+
+        <div class="comment-form">
+
+            <h3>Add a comment</h3>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ comment_form.as_p }}
+
+                <button type="submit">Submit Comment</button>
+            </form>
+        </div>
+    {% else %}
+        <p>You must be <a href="{% url 'login'%}?next={{ request.path }}">Logged in</a> to comment.</p>
+    {% endif %}
+    
+
+    <div class="comment-list">
+
+        <h2>Comments</h2>
+
+        {% for comment in comments %}
+
+            <div class="comment">
+
+                <p class="comment-meta">
+                    {{ comment.author.username }}
+                    - {{ comment.created_at|date:"f A, F d, Y"}}
+                </p>
+
+                <p>{{ comment.content }}</p>
+            </div>
+
+        {% empty %}
+
+            <p>No comments yet. Be the first!</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
+
+
+<!--
+
+Detailed Explanation of the <body> Section
+
+The body is broken down into three main sections:
+
+Displaying the main post.
+
+Displaying the "Add Comment" form (or a login link).
+
+Displaying the list of existing comments.
+
+
+Section 1: Displaying the Main Post
+This part uses the post object that you passed from your view's context.
+
+<p><a href="{perc url 'home' perc}">&laquo; Back to All Posts</a></p> This is a navigation link to go back to the homepage.
+
+{perc url 'home' perc}: This is a template tag that generates the URL for the path named 'home' (which is /). This is safer than hard-coding the URL.
+
+&laquo;: This is just an HTML code for the « symbol.
+
+<div class="post"> ... </div> This is the main container for the post, styled by your CSS to look like a white box.
+
+<h1>{{ post.title }}</h1> This is a variable tag. It takes the post object and prints the value of its title attribute.
+
+<p class="post-meta"> ... </p> This paragraph holds the post's "metadata."
+
+{{ post.author.username }}: This is a ForeignKey lookup. It takes the post object, follows its author link to the User object, and then prints the username of that User.
+
+<a href="{perc url 'community_detail' post.community.name perc}">: This is a dynamic URL tag.
+
+{perc url 'community_detail' ... perc}: It looks up the URL pattern named 'community_detail'.
+
+post.community.name: It takes the name of the post's community (e.g., "Python") and passes it as the argument that the URL pattern (<str:community_name>) is expecting. This builds the correct link (e.g., /community/Python/).
+
+{{ post.community.name }}: This prints the community's name as the clickable text for the link.
+
+{{ post.created_at|date:"F d, Y" }}: This prints the post's timestamp. The | (pipe) sends the variable to the date filter, which formats it as "October 26, 2025".
+
+<p>{{ post.content }}</p> This prints the main text content of the post.
+
+
+
+Section 2: The "Add Comment" Form
+This section is conditional. It checks if the user is logged in.
+
+{perc if user.is_authenticated perc} This is a block tag. It checks the user object (which is automatically available in all templates) and sees if its is_authenticated attribute is True.
+
+<form method="POST"> ... </form> This block is only shown if the if is True.
+
+method="POST": Tells the browser to send data when this form is submitted. This triggers the POST logic in your post_detail view.
+
+{perc csrf_token perc}: The mandatory security token to prevent CSRF attacks.
+
+{{ comment_form.as_p }}: Renders the CommentForm (passed from your view's context). .as_p automatically displays the content textarea, wrapped in <p> tags.
+
+<button type="submit">: The button that triggers the form's POST submission.
+
+{perc else perc} This block is shown if the if is False (the user is logged out).
+
+<p><a href="{perc url 'login' perc}?next={{ request.path }}">logged in</a>...</p> This is a "smart link" to the login page.
+
+{perc url 'login' perc} generates the /login/ URL.
+
+?next={{ request.path }} adds a query parameter to the URL. request.path is a variable that holds the current page's URL (e.g., /post/1/).
+
+The full link becomes /login/?next=/post/1/. Django's LoginView will see this next parameter and automatically redirect the user back to this post after they successfully log in.
+
+{perc endif perc} This closes the if/else block.
+
+
+
+Section 3: The List of Existing Comments
+This section uses the comments list from your view's context.
+
+<h2>Comments</h2> A simple heading for the section.
+
+{perc for comment in comments perc} This is a loop. It takes the comments list (which you filtered and ordered in your view) and iterates through it, one item at a time. Each item is temporarily stored in the comment variable.
+
+<div class="comment"> ... </div> A styled container for each individual comment.
+
+{{ comment.author.username }}: Prints the username of the comment's author.
+
+{{ comment.created_at|date:"f A, F d, Y" }}: Prints the comment's timestamp with a different format (e.g., "4:30 p.m., October 26, 2025").
+
+<p>{{ comment.content }}</p>: Prints the actual text of the comment.
+
+{perc empty perc This is a special tag inside the for loop. The HTML after this tag (up to {perc endfor perc}) will only be displayed if the comments list was empty.
+
+{perc endfor perc} This closes the for loop.
+
+
+-->
