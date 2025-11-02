@@ -30,7 +30,6 @@ urlpatterns = [
     # views.signup: This is the "brain." We are telling Django,
     #                "When this URL is visited, you must call the
     #                function named 'signup' inside our core/views.py file."
-    #                (We haven't created this function yet, but we will in the next step!)
     #
     # name='signup': This is the "nickname." It gives this URL a
     #                unique name, so we can refer to it easily
@@ -69,6 +68,13 @@ urlpatterns = [
     # name='community_detail': The unique nickname for this URL pattern.
 
     path('community/<str:community_name>/', views.community_detail, name='community_detail'),
+
+# --- ADD THIS NEW LINE for the create new post functionality---
+
+    # Path for the new "create post" page
+    # This maps the URL '/create-post/' to a new view
+    # we will create called 'create_post'.
+    path('create-post/', views.create_post, name='create_post'),
 
 
 ]

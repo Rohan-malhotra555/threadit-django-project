@@ -67,7 +67,9 @@
 
         {% if user.is_authenticated %}
 
-            <p> Hello, {{ user.username }}! | <a href="{% url 'logout' %}">Logout</a></p> 
+            <p> Hello, {{ user.username }}! | 
+            <a href="{% url 'create_post' %}">Create Post</a>
+            | <a href="{% url 'logout' %}">Logout</a></p> 
 
         {% else %}
         
@@ -105,7 +107,7 @@
             <h2>{{ post.title }}</h2>
 
             <p class="post-meta">
-                Posted in <a href="#">
+                Posted in <a href=" {% url 'community_detail' post.community.name %}">
                     <!--
                       Here, we print the 'post.community'.
                       Because of your `def __str__` method in models.py,

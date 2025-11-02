@@ -1,5 +1,9 @@
 from django.db import models
 
+# --- 1. ADD THIS IMPORT ---
+# Import the built-in User model from Django's authentication system
+from django.contrib.auth.models import User
+
 # Create your models here.
 
 #This is the model for our "Subreddit"
@@ -25,6 +29,12 @@ class Post(models.Model):
     # on_delete=models.CASCADE means: "If a Community is deleted, delete all its Posts too."
 
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
+
+    # --- 2. ADD THIS NEW FIELD --- Adding this feature for the Posting functionality.
+    # This links every Post to a User.
+    # We use on_delete=models.CASCADE so that if a User is deleted,
+    # all of their posts are deleted too.
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
