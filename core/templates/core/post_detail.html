@@ -134,12 +134,12 @@
 
         <div class="vote-container">
 
-            <a href="{% url 'upvote_post' post.id %}"
+            <a href="{% url 'upvote_post' post.id %}?next={{ request.path }}"
             class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
 
             <p class="score">{{ post.score }}</p>
 
-            <a href="{% url 'downvote_post' post.id %}"
+            <a href="{% url 'downvote_post' post.id %}?next={{ request.path }}"
             class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
 
         </div>
@@ -149,7 +149,7 @@
             <h1>{{ post.title }}</h1>
 
             <p class="post-meta">
-                Posted by {{ post.author.username }}
+                Posted by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
                 in <a href="{% url 'community_detail' post.community.name %}">{{ post.community.name }}</a>
                 on {{ post.created_at|date:"F d, Y" }}
             </p>
@@ -188,7 +188,7 @@
             <div class="comment">
 
                 <p class="comment-meta">
-                    {{ comment.author.username }}
+                    <a href="{% url 'profile' comment.author.username %}">{{ comment.author.username }}</a>
                     - {{ comment.created_at|date:"f A, F d, Y"}}
                 </p>
 

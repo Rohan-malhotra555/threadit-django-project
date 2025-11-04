@@ -7,6 +7,8 @@ from .forms import SignUpForm, PostForm, CommentForm # <-- Import our new form
 # This "decorator" is what we'll use to protect the view
 from django.contrib.auth.decorators import login_required 
 
+from django.contrib.auth.models import User # for the user profile page
+
 
 
 
@@ -240,10 +242,29 @@ def upvote_post(request, post_id):
         # This is a new upvote. Add them to the upvotes list.
         post.upvotes.add(user)
 
-    # 4. Redirect the user back to the homepage.
-    #    (A more advanced way is to redirect back to the
-    #    page they came from, but 'home' is simple and works.)
-    return redirect('home')
+
+    next_page = request.GET.get('next', 'home')
+    
+    """
+    next_page = request.GET.get('next', 'home')
+
+    request.GET: This is a dictionary-like object that holds all the query parameters from the URL.
+
+    If your URL is .../upvote/?next=/post/1/, then request.GET is {'next': '/post/1/'}.
+
+    If your URL is just .../upvote/ (with no ?), then request.GET is empty {}.
+
+    .get('next', 'home'): This is a standard Python dictionary method.
+
+    'next' (Argument 1): This is the key it tries to find in the request.GET dictionary.
+
+    'home' (Argument 2): This is the default value to use if the key 'next' is not found.
+
+    So, this one line means: "Look for a URL parameter named next. If you find 
+    it, put its value (like /post/1/) into the next_page variable. If you don't 
+    find it, put the string 'home' into the next_page variable instead."
+    """
+    return redirect(next_page)
 
 
 @login_required # Ensures only logged-in users can run this view
@@ -274,8 +295,47 @@ def downvote_post(request, post_id):
         # This is a new downvote. Add them to the downvotes list.
         post.downvotes.add(user)
 
+    next_page = request.GET.get('next', 'home')
+    
     # 4. Redirect back to the homepage.
-    return redirect('home')
+    return redirect(next_page)
+
+
+
+def profile_view(request, username):
+    """
+    Shows a user's profile page, including their posts and comments.
+    """
+    
+    # 1. Get the User object.
+    # We use get_object_or_404 to find one User where their 'username'
+    # field exactly matches the 'username' captured from the URL.
+    # If no user is found, it automatically shows a 404 Page Not Found.
+    profile_user = get_object_or_404(User, username=username)
+    
+    # 2. Get all posts made by this user, newest first.
+    # We filter the Post model, looking for all posts where the
+    # 'author' field (our ForeignKey) is equal to the 'profile_user' object.
+    posts = Post.objects.filter(author=profile_user).order_by('-created_at')
+    
+    # 3. Get all comments made by this user, newest first.
+    # We do the same thing for comments, filtering by the 'author' field.
+    comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
+    
+    # 4. Package all our data into a context dictionary.
+    # Note: We use 'profile_user' to distinguish this from 'user',
+    # which is the default variable for the *logged-in* user.
+    context = {
+        'profile_user': profile_user,  # The user whose profile we are viewing
+        'posts': posts,                # The list of their posts
+        'comments': comments,          # The list of their comments
+    }
+    
+    # 5. Render the new template (which we'll create next).
+    return render(request, 'core/profile.html', context)
+
+
+
 
 
 """

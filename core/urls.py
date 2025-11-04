@@ -91,6 +91,9 @@ urlpatterns = [
     # e.g., /post/5/downvote/
     path('post/<int:post_id>/downvote/', views.downvote_post, name='downvote_post'),
 
-
+    # Path for the User Profile page
+    # This is a dynamic URL that captures a string (the username)
+    # e.g., /user/rohan/
+    path('user/<str:username>/', views.profile_view, name='profile'),
 
 ]

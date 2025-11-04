@@ -187,7 +187,7 @@
                         Y: Four-digit year (e.g., "2025")
                     -->
                     {{ post.created_at|date:"F d, Y" }} 
-                    by {{ post.author.username }}
+                    by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
                 </p>
 
                 <!-- This just prints the 'content' field of the post -->

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile_user.username }}'s Profile</title>
+
+    <style>
+        /* All the same styles from home.html */
+        body { 
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #f4f4f4;
+        }
+        
+        /* New style for the profile header */
+        .profile-header {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .profile-header h1 {
+            margin: 0;
+        }
+        .profile-header p {
+            font-size: 0.9em;
+            color: #777;
+            margin: 5px 0 0 0;
+        }
+
+        /* Re-using the .post styles for our post list */
+        .post { 
+            display: flex;
+            align-items: flex-start;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .vote-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-right: 15px;
+            flex-shrink: 0;
+        }
+        .vote-link { font-size: 20px; text-decoration: none; color: #888; }
+        .vote-link.voted-up { color: #007bff; }
+        .vote-link.voted-down { color: #ff4500; }
+        .score { font-size: 18px; font-weight: bold; color: #555; margin: 5px 0; }
+        .post-content { flex-grow: 1; }
+        .post-content h2 { margin: 0 0 10px 0; }
+        .post-meta { font-size: 0.9em; color: #777; }
+        
+        /* Re-using the .comment styles for our comment list */
+        .comment {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #007bff;
+        }
+        .comment-meta { font-size: 0.8em; color: #555; font-weight: bold; }
+        
+        /* A simple heading for our activity sections */
+        .activity-heading {
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <p><a href="{% url 'home' %}">&laquo; Back to All Posts</a></p>
+
+    <div class="profile-header">
+
+        <h1>{{ profile_user.username }}</h1>
+
+        <p>Member since {{ profile_user.date_joined|date:"F d, Y" }}</p>
+
+        {% if user == profile_user %}
+
+            <p><a href="#"> Edit Profile</a> (Coming Soon)</p>
+        
+        {% endif %}
+
+    </div>
+
+    <!--Posts section-->
+
+    <h2 class="activity-heading">Posts by {{ profile_user.username }}</h2>
+
+    {% for post in posts %}
+        <div class="post">
+
+            <div class="vote-container">
+
+                <a href="{% url 'upvote_post' post.id %}?next={{ request.path }}"
+                class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
+
+                <p class="score"> {{ post.score }}</p>
+
+                <a href="{% url 'downvote_post' post.id %}?next={{ request.path }}"
+                class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
+
+            </div>
+
+            <div class="post-content">
+
+                <h2>
+                    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+                </h2>
+
+                <p class="post-meta">
+
+                    Posted in <a href="{% url 'community_detail' post.community.name %}">{{ post.community.name }}</a>
+                    on {{ post.created_at|date:"F d, Y" }}
+
+                </p>
+            </div>
+        </div>
+
+        {% empty %}
+            <p>{{ profile_user.username }} has not created any posts yet.</p>
+        {% endfor %}
+
+
+        <!--Comments section-->
+
+        <h2 class="activity-heading">Comments by {{ profile_user.username }}</h2>
+
+        {% for comment in comments %}
+
+            <div class="comment">
+
+                <p class="comment-meta">
+                    Commented on <a href="{% url 'post_detail' comment.post.id %}">
+                        {{ comment.post.title }}
+                    </a>
+                    - {{ comment.created_at|date:"f A, F d, Y" }}
+                </p>
+
+                <p>{{ comment.content }}</p>
+            </div>
+
+        {% empty %}
+            <p>{{ profile_user.username }} has not made any comments yet.</p>
+        {% endfor %}
+    
+</body>
+</html>
