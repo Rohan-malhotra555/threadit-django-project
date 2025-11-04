@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms    
 
-from .models import Post, Comment # importing Post to be used for the model in the Posting functionality
+from .models import Post, Comment, Community # importing Post to be used for the model in the Posting functionality
 
 """
 You have two classes because they do two different jobs:
@@ -69,4 +69,21 @@ class CommentForm(forms.ModelForm):
         # in the view function.
         fields = ['content']
 
+
+class CommunityForm(forms.ModelForm):
+
+    """
+    This is the form for creating a new Community.
+    It's a ModelForm built from our Community model.
+    """
+    class Meta:
+
+        # model = Community: Tells the ModelForm to use our
+        # Community model as its blueprint.
+        model = Community
+
+        # fields = ['name', 'description']: Tells the form to
+        # only show these two fields to the user.
+        # 'created_at' is set automatically by the model.
+        fields = ['name', 'description']
         

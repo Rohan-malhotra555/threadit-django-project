@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404 # added get_obj
 from .models import Post, Community, Comment  # added Community for the specific community search
 
 from django.contrib.auth import login
-from .forms import SignUpForm, PostForm, CommentForm # <-- Import our new form
+from .forms import SignUpForm, PostForm, CommentForm, CommunityForm # <-- Import our new form
 
 # This "decorator" is what we'll use to protect the view
 from django.contrib.auth.decorators import login_required 
@@ -300,6 +300,31 @@ def downvote_post(request, post_id):
     # 4. Redirect back to the homepage.
     return redirect(next_page)
 
+"""
+You've perfectly traced the flow for the VOTING SYSTEM:
+
+Click: User clicks the href="{% url 'upvote_post' post.id %}" link.
+
+URL Route: core/urls.py matches the path and calls the upvote_post view.
+
+View Logic: The upvote_post view runs. It gets the post and user, and then 
+modifies the post.upvotes or post.downvotes list (e.g., post.upvotes.add(user)). This change is saved to the database immediately.
+
+Redirect: The view finishes and sends a return redirect('home') command back 
+to the browser.
+
+New Request: The browser, following the redirect, makes a brand new GET 
+request to the homepage (/).
+
+Home View: The home view runs again, fetching the (now updated) posts from 
+the database.
+
+Template Render: The home.html template is rendered. When it gets 
+to {{ post.score }}, it calls the score property, which runs the 
+self.upvotes.count() - self.downvotes.count() calculation using the newly 
+updated lists, displaying the correct score.
+"""
+
 
 
 def profile_view(request, username):
@@ -335,30 +360,36 @@ def profile_view(request, username):
     return render(request, 'core/profile.html', context)
 
 
+@login_required # Ensures only logged-in users can run this view
+def create_community(request):
+    """
+    Handles the creation of a new Community.
+    """
+    # Check if the user is submitting the form (POST) or just visiting (GET)
+    if request.method == 'POST':
+        # This is a POST request. User is submitting the form.
+        # Create a form instance and fill it with the submitted data.
+        form = CommunityForm(request.POST)
+        
+        # Check if the form's data is valid (e.g., name is not blank)
+        if form.is_valid():
+            # The form is valid! Save the new community to the database.
+            # We save it to a variable to get the new object.
+            new_community = form.save()
+            
+            # --- THIS IS THE BEST PRACTICE REDIRECT ---
+            # Redirect the user to the detail page for the community
+            # they just created.
+            return redirect('community_detail', community_name=new_community.name)
+    else:
+        # This is a GET request. The user is just visiting the page.
+        # Create a new, blank instance of our CommunityForm.
+        form = CommunityForm()
 
-
-
-"""
-You've perfectly traced the flow for the VOTING SYSTEM:
-
-Click: User clicks the href="{% url 'upvote_post' post.id %}" link.
-
-URL Route: core/urls.py matches the path and calls the upvote_post view.
-
-View Logic: The upvote_post view runs. It gets the post and user, and then 
-modifies the post.upvotes or post.downvotes list (e.g., post.upvotes.add(user)). This change is saved to the database immediately.
-
-Redirect: The view finishes and sends a return redirect('home') command back 
-to the browser.
-
-New Request: The browser, following the redirect, makes a brand new GET 
-request to the homepage (/).
-
-Home View: The home view runs again, fetching the (now updated) posts from 
-the database.
-
-Template Render: The home.html template is rendered. When it gets 
-to {{ post.score }}, it calls the score property, which runs the 
-self.upvotes.count() - self.downvotes.count() calculation using the newly 
-updated lists, displaying the correct score.
-"""
+    # Put the form (either blank or with errors) into context
+    context = {
+        'form': form, # Use 'form' to be consistent with our other templates
+    }
+    
+    # Render the 'create_community.html' template (we'll make this next)
+    return render(request, 'core/create_community.html', context)

@@ -96,4 +96,7 @@ urlpatterns = [
     # e.g., /user/rohan/
     path('user/<str:username>/', views.profile_view, name='profile'),
 
+
+    path('create-community/', views.create_community, name='create_community'),
+
 ]
