@@ -82,6 +82,15 @@ urlpatterns = [
     # integer and passes it to the view as a variable named 'post_id'.
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
 
+# Path for upvoting a post
+    # This will be triggered when a user clicks an upvote link
+    # e.g., /post/5/upvote/
+    path('post/<int:post_id>/upvote/', views.upvote_post, name='upvote_post'),
+
+    # Path for downvoting a post
+    # e.g., /post/5/downvote/
+    path('post/<int:post_id>/downvote/', views.downvote_post, name='downvote_post'),
+
 
 
 ]

@@ -36,6 +36,24 @@ class Post(models.Model):
     # all of their posts are deleted too.
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    # We use a ManyToManyField to link a Post to many Users (who upvoted).
+    # related_name='post_upvotes' gives us a way to find all posts a user
+    # has upvoted (e.g., user.post_upvotes.all()).
+    # blank=True means a post can have zero upvotes.
+
+    # Forward name: upvotes (the field name you wrote on the Post model).
+
+    # Reverse name: post_upvotes (the related_name you specified, which gets attached to the User model).
+    upvotes = models.ManyToManyField(User, related_name='post_upvotes', blank=True)
+
+    # We do the same for downvotes.
+    downvotes = models.ManyToManyField(User, related_name='post_downvotes', blank=True)
+
+    @property
+    def score(self):
+
+        return self.upvotes.count() - self.downvotes.count()
+
     def __str__(self):
         return self.title
     

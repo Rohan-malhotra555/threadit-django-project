@@ -207,13 +207,98 @@ def post_detail(request, post_id):
     return render(request, 'core/post_detail.html', context)
 
 
+# The following code is for the VOTING SYSTEM functionality.
 
+@login_required # Ensures only logged-in users can run this view
+def upvote_post(request, post_id):
+    """
+    Handles upvoting a post.
+    """
+    # 1. Get the post object that the user is trying to upvote
+    #    using the post_id from the URL.
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 2. Get the user object for the person making the request.
+    user = request.user
+
+    # 3. The Core Voting Logic
+    
+    # Case 1: Has the user already upvoted this post?
+    if user in post.upvotes.all():
+        # Yes. This means they are clicking "upvote" again to *remove* their upvote.
+        post.upvotes.remove(user)
+    
+    # Case 2: Has the user already *downvoted* this post?
+    elif user in post.downvotes.all():
+        # Yes. This means they are changing their vote from down to up.
+        # We must remove their downvote AND add their upvote.
+        post.downvotes.remove(user)
+        post.upvotes.add(user)
         
+    # Case 3: The user has not voted on this post at all.
+    else:
+        # This is a new upvote. Add them to the upvotes list.
+        post.upvotes.add(user)
+
+    # 4. Redirect the user back to the homepage.
+    #    (A more advanced way is to redirect back to the
+    #    page they came from, but 'home' is simple and works.)
+    return redirect('home')
 
 
+@login_required # Ensures only logged-in users can run this view
+def downvote_post(request, post_id):
+    """
+    Handles downvoting a post. This logic is the
+    exact mirror opposite of the upvote_post view.
+    """
+    # 1. Get the post and user
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
+    # 3. The Core Voting Logic (Reversed)
+
+    # Case 1: Has the user already downvoted this post?
+    if user in post.downvotes.all():
+        # Yes. Remove their downvote.
+        post.downvotes.remove(user)
+    
+    # Case 2: Has the user already *upvoted* this post?
+    elif user in post.upvotes.all():
+        # Yes. Change their vote from up to down.
+        post.upvotes.remove(user)
+        post.downvotes.add(user)
+        
+    # Case 3: The user has not voted on this post at all.
+    else:
+        # This is a new downvote. Add them to the downvotes list.
+        post.downvotes.add(user)
+
+    # 4. Redirect back to the homepage.
+    return redirect('home')
 
 
+"""
+You've perfectly traced the flow for the VOTING SYSTEM:
 
+Click: User clicks the href="{% url 'upvote_post' post.id %}" link.
 
+URL Route: core/urls.py matches the path and calls the upvote_post view.
 
+View Logic: The upvote_post view runs. It gets the post and user, and then 
+modifies the post.upvotes or post.downvotes list (e.g., post.upvotes.add(user)). This change is saved to the database immediately.
 
+Redirect: The view finishes and sends a return redirect('home') command back 
+to the browser.
+
+New Request: The browser, following the redirect, makes a brand new GET 
+request to the homepage (/).
+
+Home View: The home view runs again, fetching the (now updated) posts from 
+the database.
+
+Template Render: The home.html template is rendered. When it gets 
+to {{ post.score }}, it calls the score property, which runs the 
+self.upvotes.count() - self.downvotes.count() calculation using the newly 
+updated lists, displaying the correct score.
+"""

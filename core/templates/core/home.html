@@ -34,24 +34,64 @@
             background-color: #f4f4f4; /* A light grey background color */
         }
         
-        /* This sets the style for any element with class="post" */
+        /* This is the main container for a single post */
         .post { 
-            background-color: #fff;  /* Give each post a white background */
-            border: 1px solid #ddd;   /* A light grey border */
-            border-radius: 5px;       /* Nice rounded corners */
-            padding: 15px;            /* Space inside the post box */
-            margin-bottom: 15px;      /* Space between posts */
-        }
-
-        /* This styles any <h2> tag that is *inside* a .post element */
-        .post h2 { 
-            margin: 0 0 10px 0; /* No margin on top/left/right, 10px on bottom */
+            display: flex; /* This is the key: makes children (.vote-container, .post-content) sit side-by-side */
+            align-items: flex-start; /* Aligns items to the top */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
         
-        /* This styles any <p> tag with class="post-meta" */
+        /* This styles the left-hand voting column */
+        .vote-container {
+            display: flex; /* Makes the items inside this (arrows, score) flexible */
+            flex-direction: column; /* Stacks the items vertically */
+            align-items: center;  /* Centers them horizontally */
+            padding-right: 15px; /* Adds space between voting and content */
+            flex-shrink: 0; /* Stops this column from shrinking */
+        }
+        
+        /* This styles the up/down arrow links */
+        .vote-link {
+            font-size: 20px; /* Makes arrows bigger */
+            text-decoration: none; /* Removes the underline */
+            color: #888; /* Grey color */
+        }
+        .vote-link:hover {
+            color: #555; /* Blue on hover */
+        }
+
+        .vote-link.voted-up {
+            color: #007bff;
+        }
+
+        .vote-link.voted-down {
+            color: #ff4500;
+        }
+        
+        /* This styles the vote count number */
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            margin: 5px 0; /* Adds vertical space around the score */
+        }
+        
+        /* This styles the right-hand content column */
+        .post-content {
+            flex-grow: 1; /* Allows the content to take up all remaining horizontal space */
+        }
+
+        /* Styles for the text inside the post-content */
+        .post-content h2 { 
+            margin: 0 0 10px 0;
+        }
         .post-meta { 
-            font-size: 0.9em;   /* Make the font slightly smaller */
-            color: #777;       /* A medium-grey color for the text */
+            font-size: 0.9em;
+            color: #777;
         }
     </style>
 </head>
@@ -104,41 +144,60 @@
               This line tells Django: "Get the current 'post' from the loop
               and print its 'title' field."
             -->
-            <h2>
-                <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-            </h2>
 
-            <p class="post-meta">
-                Posted in <a href=" {% url 'community_detail' post.community.name %}">
+            <div class="vote-container">
+
+                <a href="{% url 'upvote_post' post.id %}" 
+                class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
+                <p class="score">{{ post.score }}</p>
+                <a href="{% url 'downvote_post' post.id %}" 
+                class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
+
+            </div>
+
+            <div class="post-content">
+                <h2>
+                    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+                </h2>
+
+                <p class="post-meta">
+                    Posted in <a href=" {% url 'community_detail' post.community.name %}">
+                        <!--
+                        Here, we print the 'post.community'.
+                        Because of your `def __str__` method in models.py,
+                        Django is smart enough to print the *name* of the
+                        community (e.g., "python") instead of a
+                        confusing ID (e.g., "1").
+                        -->
+                        {{ post.community }}
+                    </a> 
+                    on 
                     <!--
-                      Here, we print the 'post.community'.
-                      Because of your `def __str__` method in models.py,
-                      Django is smart enough to print the *name* of the
-                      community (e.g., "python") instead of a
-                      confusing ID (e.g., "1").
+                    Here we print the 'created_at' timestamp.
+                    The | is a "Filter." It formats the data.
+                    |date:"F d, Y" tells Django to format the date
+                    like "October 26, 2025".
+                    
+                    :"F d, Y": This is an argument passed to the date filter. It's a format string telling the filter how you want the date to look, using standard codes:
+
+                        F: Full month name (e.g., "October")
+
+                        d: Day of the month, with leading zero (e.g., "05", "26")
+
+                        Y: Four-digit year (e.g., "2025")
                     -->
-                    {{ post.community }}
-                </a> 
-                on 
-                <!--
-                  Here we print the 'created_at' timestamp.
-                  The | is a "Filter." It formats the data.
-                  |date:"F d, Y" tells Django to format the date
-                  like "October 26, 2025".
-                  
-                  :"F d, Y": This is an argument passed to the date filter. It's a format string telling the filter how you want the date to look, using standard codes:
+                    {{ post.created_at|date:"F d, Y" }} 
+                    by {{ post.author.username }}
+                </p>
 
-                    F: Full month name (e.g., "October")
+                <!-- This just prints the 'content' field of the post -->
+                {% if post.content %}
 
-                    d: Day of the month, with leading zero (e.g., "05", "26")
+                    <p>{{ post.content }}</p>
+                {% endif %}
 
-                    Y: Four-digit year (e.g., "2025")
-                -->
-                {{ post.created_at|date:"F d, Y" }}
-            </p>
+            </div>
 
-            <!-- This just prints the 'content' field of the post -->
-            <p>{{ post.content }}</p>
         </div>
 
     <!--
