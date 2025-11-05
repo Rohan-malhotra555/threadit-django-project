@@ -393,3 +393,79 @@ def create_community(request):
     
     # Render the 'create_community.html' template (we'll make this next)
     return render(request, 'core/create_community.html', context)
+
+
+@login_required # User must be logged in
+def edit_post(request, post_id):
+    """
+    Handles editing an existing post.
+    """
+    # 1. Get the specific post object we want to edit
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 2. --- CRITICAL SECURITY CHECK ---
+    #    Check if the currently logged-in user is the author of this post.
+    if request.user != post.author:
+        # If they are not the author, redirect them home.
+        # (A real app might show a "403 Forbidden" error instead)
+        return redirect('home')
+
+    # 3. Check if the user is submitting the form (POST) or just visiting (GET)
+    if request.method == 'POST':
+        # This is a POST request. User is submitting the edited form.
+        # We fill the PostForm with the new data from request.POST
+        # AND we link it to the existing 'post' object using 'instance=post'.
+        form = PostForm(request.POST, instance=post)
+        
+        if form.is_valid():
+            # The form is valid! Save the changes to the *existing* post.
+            form.save()
+            
+            # Redirect back to the post's detail page
+            return redirect('post_detail', post_id=post.id)
+    else:
+        # This is a GET request. The user is visiting the edit page.
+        # We create a PostForm and pre-fill it with the *existing*
+        # data from the 'post' object by passing 'instance=post'.
+        form = PostForm(instance=post)
+    
+    # 4. Prepare the context
+    context = {
+        'form': form,
+        'post': post, # Pass the post object for the template to use
+    }
+    
+    # 5. Render the template. We can REUSE our 'create_post.html'
+    #    template for this, as it just shows a form.
+    return render(request, 'core/create_post.html', context)
+
+
+# --- ADD THIS NEW FUNCTION FOR DELETING ---
+
+@login_required
+def delete_post(request, post_id):
+    """
+    Handles deleting an existing post.
+    """
+    # 1. Get the specific post object
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 2. --- CRITICAL SECURITY CHECK ---
+    if request.user != post.author:
+        # If not the author, do nothing and redirect home
+        return redirect('home')
+    
+    # 3. We only allow deletion via a POST request for security.
+    #    (This prevents Google from accidentally deleting posts)
+    if request.method == 'POST':
+        # The user has confirmed the deletion. Delete the post.
+        post.delete()
+        
+        # Redirect back to the homepage
+        return redirect('home')
+    
+    # 4. If it's a GET request, we can show a confirmation page.
+    #    (For simplicity, we'll just handle the POST)
+    #    We can build a 'delete_confirm.html' template later.
+    #    For now, we'll just redirect home if it's a GET.
+    return redirect('post_detail', post_id=post.id)

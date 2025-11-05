@@ -122,6 +122,31 @@
             font-weight: bold;
         }
 
+        /* Styles the container for the Edit/Delete links */
+        .post-actions {
+            margin-top: 15px; /* Adds space above the links */
+            padding-top: 10px; /* Adds space above the links, inside the border */
+            border-top: 1px solid #eee; /* A faint dividing line */
+        }
+
+        /* Styles the Edit/Delete links */
+        .post-actions a {
+            font-size: 0.9em;
+            font-weight: bold;
+            text-decoration: none;
+            color: #007bff; /* Blue link color */
+            margin-right: 15px; /* Space between the links */
+        }
+
+        /* Changes the "Delete" link color to be more cautious */
+        .post-actions a:last-child {
+            color: #dc3545; /* Red link color */
+        }
+
+        .post-actions a:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 
@@ -155,6 +180,17 @@
             </p>
 
             <p>{{ post.content }}</p>
+
+            {% if user == post.author %}
+
+                <div class="post-actions">
+                    <a href="{% url 'edit_post' post.id %}">Edit</a>
+
+                    <a href="{% url 'delete_post' post.id %}">Delete</a>
+                </div>
+
+            {% endif %}
+                
         </div>
     </div>
 
