@@ -573,3 +573,75 @@ def delete_post(request, post_id):
     #    We can build a 'delete_confirm.html' template later.
     #    For now, we'll just redirect home if it's a GET.
     return redirect('post_detail', post_id=post.id)
+
+
+@login_required
+def edit_comment(request, comment_id):
+    """
+    Handles editing an existing comment.
+    """
+    # 1. Get the specific comment object
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # 2. Security Check: Is the logged-in user the author?
+    if request.user != comment.author:
+        return redirect('home') # Or some other "forbidden" page
+
+    # 3. Handle the GET vs. POST
+    if request.method == 'POST':
+        # User is submitting the form.
+        # We bind the new data to the *existing* comment instance.
+        form = CommentForm(request.POST, instance=comment)
+        
+        if form.is_valid():
+            form.save()
+            
+            # --- FIX 1 (Redirect) ---
+            # Redirect back to the post detail page that this
+            # comment belongs to.
+            return redirect('post_detail', post_id=comment.post.id)
+    else:
+        # User is visiting the page.
+        # Show the form, pre-filled with the existing comment's data.
+        form = CommentForm(instance=comment)
+    
+    context = {
+        'form': form,
+        'comment': comment, # Pass the comment for the template
+    }
+    
+    # We will need to create this new template
+    return render(request, 'core/edit_comment.html', context)
+
+
+@login_required
+def delete_comment(request, comment_id):
+    """
+    Handles deleting an existing comment.
+    """
+    # --- FIX 2 (Variable Name) ---
+    # Get the comment by 'comment_id' from the URL, not 'comment'
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # 2. Security Check
+    if request.user != comment.author:
+        return redirect('home')
+    
+    # 3. Handle POST request (for security)
+    if request.method == 'POST':
+        # Store the post_id *before* we delete the comment
+        post_id = comment.post.id
+        
+        # Delete the comment from the database
+        comment.delete()
+        
+        # --- FIX 3 (Redirect) ---
+        # Redirect back to the post detail page
+        return redirect('post_detail', post_id=post_id)
+    
+    # 4. Handle GET request (if user just visits the URL)
+    #    Just send them back to the post page.
+    # --- FIX 4 (Redirect) ---
+    return redirect('post_detail', post_id=comment.post.id)
+
+

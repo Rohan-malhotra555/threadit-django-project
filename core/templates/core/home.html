@@ -93,6 +93,30 @@
             font-size: 0.9em;
             color: #777;
         }
+
+        /* This styles the main pagination container div */
+        .paginator {
+            text-align: center; /* Centers the links */
+            margin-top: 20px; /* Adds space above the links */
+            font-size: 0.9em;
+        }
+        
+        /* This styles the <span> that wraps the links */
+        .paginator .step-links {
+            display: inline-block; /* Allows us to add padding and margins */
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        /* This styles the "Page X of Y" text */
+        .paginator .current-page {
+            margin: 0 15px; /* Adds space on either side of the text */
+            font-weight: bold;
+            color: #555;
+        }
+        
     </style>
 </head>
 
