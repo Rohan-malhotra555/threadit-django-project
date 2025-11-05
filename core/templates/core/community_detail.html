@@ -67,7 +67,7 @@
         }
         
         /* Styles for the text inside the post-content */
-        .post-content h1 { /* Updated from .post h1 */
+        .post-content h2 { /* Changed from h1 to h2 */
             margin: 0 0 10px 0;
         }
         .post-meta { 
@@ -138,6 +138,27 @@
             opacity: 0.9;
         }
 
+        /* --- ADD THIS CSS FOR PAGINATION --- */
+        .pagination {
+            text-align: center; /* Centers the links */
+            margin-top: 20px; /* Adds space above the links */
+            font-size: 0.9em;
+        }
+        
+        .pagination .step-links {
+            display: inline-block; /* Allows us to add padding and margins */
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .pagination .current-page {
+            margin: 0 15px; /* Adds space on either side of the text */
+            font-weight: bold;
+            color: #555;
+        }
+
     </style>
 </head>
 
@@ -157,40 +178,56 @@
 
     <hr>
 
-    {% for post in posts %}
+    {% for post in page_obj %}
 
-    <div class="post">
+        <div class="post">
 
-        <div class="vote-container">
+            <div class="vote-container">
 
-            <a href="{% url 'upvote_post' post.id %}?next={{ request.path }}" 
-            class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
-            <p class="score">{{ post.score }}</p>
-            <a href="{% url 'downvote_post' post.id %}?next={{ request.path }}" 
-            class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
+                <a href="{% url 'upvote_post' post.id %}?next={{ request.path }}" 
+                class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
+                <p class="score">{{ post.score }}</p>
+                <a href="{% url 'downvote_post' post.id %}?next={{ request.path }}" 
+                class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
 
-        </div>
+            </div>
 
-        <div class="post-content">
+            <div class="post-content">
 
-            <h2>
+                <h2>
+                
+                <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
             
-            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-        
-            </h2>
+                </h2>
 
-            <p class="post-meta">
-                Posted on {{ post.created_at|date:"F d, Y" }}
-                by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
-            </p>
+                <p class="post-meta">
+                    Posted on {{ post.created_at|date:"F d, Y" }}
+                    by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
+                </p>
 
-            <p> {{ post.content }}</p>
+                <p> {{ post.content }}</p>
+
+            </div>
 
         </div>
-
-    </div>
 
     {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+
+            <span class="current-page">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
     
 </body>
 </html>

@@ -107,7 +107,7 @@
 
         {% if user.is_authenticated %}
 
-            <p> Hello, {{ user.username }}! | 
+            <p> Hello, <a href="{% url 'profile' user.username %}">{{ user.username }}</a>! | 
             <a href="{% url 'create_post' %}">Create Post</a>
             | <a href="{% url 'create_community' %}">Create Community</a>
             | <a href="{% url 'logout' %}">Logout</a></p> 
@@ -134,7 +134,7 @@
       we passed from the view. Then, loop through every item in that list.
       For each item, temporarily call it 'post'."
     -->
-    {% for post in posts %}
+    {% for post in page_obj %}
 
         <!-- This is a standard HTML div. We give it a class of "post"
              so it gets the styles we defined in the <style> tag above. -->
@@ -207,6 +207,26 @@
       for every single post in your list.
     -->
     {% endfor %}
+
+    <div class="paginator">
+
+        <span class="step-links">
+
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+
+            <span class="current-page">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">&raquo; Next</a>
+            {% endif %}
+
+        </span>
+
+    </div>
 
 </body>
 </html>

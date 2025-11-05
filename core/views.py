@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 
 from django.contrib.auth.models import User # for the user profile page
 
+from django.core.paginator import Paginator # for the creation of the pages in home page. 
+
 
 
 
@@ -16,15 +18,52 @@ def home(request):
 
     # 1. Get all the Post objects from the database
     #    We use .order_by('-created_at') to show the newest posts first.
-    posts = Post.objects.all().order_by('-created_at')
+    # posts = Post.objects.all().order_by('-created_at')
 
     # 2. Define the "context"
     #    This is a Python dictionary that passes our data to the template.
     #    The key ('posts') is the name we'll use in the HTML.
+    # context = {
+
+    #     'posts': posts,
+    # }
+
+    """
+    This is the view for our homepage.
+    It now includes pagination.
+    """
+
+    # 1. Get the list of ALL posts, in order (no change here).
+    #    This is the "master list" we will paginate.
+    post_list = Post.objects.all().order_by('-created_at')
+
+    # 2. Create a Paginator object.
+    #    We tell it:
+    #    - What list to paginate (post_list)
+    #    - How many items per page (e.g., 5)
+    paginator = Paginator(post_list, 5)
+
+    # 3. Get the page number from the URL's query parameters.
+    #    e.g., /?page=1, /?page=2
+    #    request.GET.get('page') looks for the 'page' parameter.
+    page_number = request.GET.get('page')
+
+    # 4. Get the "Page" object for the requested page number.
+    #    paginator.get_page() is a safe way to do this.
+    #    - If page_number is valid (e.g., 2), it gets Page 2.
+    #    - If page_number is not provided (None), it gets Page 1.
+    #    - If page_number is invalid (e.g., 999), it gets the last page. 
+    page_obj = paginator.get_page(page_number)
+
+    # 5. Define the "context".
+    #    We no longer pass the *entire* list of posts.
+    #    We pass the 'page_obj' which contains *only* the posts
+    #    for the current page, plus all the pagination info.
     context = {
 
-        'posts': posts,
+        'page_obj': page_obj,
     }
+
 
     # 3. Render the HTML page (home.html) and send it back
     return render(request, 'core/home.html', context)
@@ -70,33 +109,63 @@ def signup(request):
 
 def community_detail(request, community_name):
     
+    # """
+    # Shows details for a specific community and lists its posts.
+    # """
+    # # 1. Find the Community object based on the name from the URL.
+    # #    get_object_or_404 is a handy shortcut:
+    # #    - It tries to get the Community where the 'name' field matches community_name.
+    # #    - If it finds one, it returns the object.
+    # #    - If it finds *none*, it automatically raises a 404 "Page Not Found" error.
+    # # IMPORTANT: the community name is case sensitive.
+    # community = get_object_or_404(Community, name=community_name)
+
+    # # In order to search in a non case-sensitive way, use __iexact
+    # # community = get_object_or_404(Community, name__iexact=community_name)
+
+    # # 2. Get all posts that BELONG TO this specific community.
+    # #    We filter the Post objects where the 'community' field (our ForeignKey)
+    # #    is exactly the community object we just found.
+    # #    We also order them by creation date.
+    # posts = Post.objects.filter(community=community).order_by('-created_at')
+
+    # # 3. Create the context dictionary to pass data to the template.
+    # context = {
+    #     'community': community, # Pass the specific community object
+    #     'posts': posts,         # Pass the filtered list of posts
+    # }
+
+    # # 4. Render the new template (which we'll create next).
+    # return render(request, 'core/community_detail.html', context)
+
     """
-    Shows details for a specific community and lists its posts.
+    Shows details for a specific community and lists its posts,
+    now with pagination.
     """
-    # 1. Find the Community object based on the name from the URL.
-    #    get_object_or_404 is a handy shortcut:
-    #    - It tries to get the Community where the 'name' field matches community_name.
-    #    - If it finds one, it returns the object.
-    #    - If it finds *none*, it automatically raises a 404 "Page Not Found" error.
-    # IMPORTANT: the community name is case sensitive.
-    community = get_object_or_404(Community, name=community_name)
+    
+    # 1. Get the Community object (no change)
+    community = get_object_or_404(Community, name__iexact=community_name)
+    
+    # 2. Get the *complete* post list for this community (no change)
+    post_list = Post.objects.filter(community=community).order_by('-created_at')
+    
+    # 3. Create a Paginator object for the posts
+    paginator = Paginator(post_list, 5) # Show 5 posts per page
 
-    # In order to search in a non case-sensitive way, use __iexact
-    # community = get_object_or_404(Community, name__iexact=community_name)
+    # 4. Get the page number from the URL query parameter
+    page_number = request.GET.get('page')
 
-    # 2. Get all posts that BELONG TO this specific community.
-    #    We filter the Post objects where the 'community' field (our ForeignKey)
-    #    is exactly the community object we just found.
-    #    We also order them by creation date.
-    posts = Post.objects.filter(community=community).order_by('-created_at')
-
-    # 3. Create the context dictionary to pass data to the template.
+    # 5. Get the Page object for the posts
+    page_obj = paginator.get_page(page_number)
+    
+    # 6. Package the context
     context = {
-        'community': community, # Pass the specific community object
-        'posts': posts,         # Pass the filtered list of posts
+        'community': community,
+        # Pass the 'Page' object, not the full list
+        'page_obj': page_obj, 
     }
-
-    # 4. Render the new template (which we'll create next).
+    
+    # 7. Render the template (no change)
     return render(request, 'core/community_detail.html', context)
 
 
@@ -328,35 +397,70 @@ updated lists, displaying the correct score.
 
 
 def profile_view(request, username):
+    # """
+    # Shows a user's profile page, including their posts and comments.
+    # """
+    
+    # # 1. Get the User object.
+    # # We use get_object_or_404 to find one User where their 'username'
+    # # field exactly matches the 'username' captured from the URL.
+    # # If no user is found, it automatically shows a 404 Page Not Found.
+    # profile_user = get_object_or_404(User, username=username)
+    
+    # # 2. Get all posts made by this user, newest first.
+    # # We filter the Post model, looking for all posts where the
+    # # 'author' field (our ForeignKey) is equal to the 'profile_user' object.
+    # posts = Post.objects.filter(author=profile_user).order_by('-created_at')
+    
+    # # 3. Get all comments made by this user, newest first.
+    # # We do the same thing for comments, filtering by the 'author' field.
+    # comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
+    
+    # # 4. Package all our data into a context dictionary.
+    # # Note: We use 'profile_user' to distinguish this from 'user',
+    # # which is the default variable for the *logged-in* user.
+    # context = {
+    #     'profile_user': profile_user,  # The user whose profile we are viewing
+    #     'posts': posts,                # The list of their posts
+    #     'comments': comments,          # The list of their comments
+    # }
+    
+    # # 5. Render the new template (which we'll create next).
+    # return render(request, 'core/profile.html', context)
+
+    # new paginator part
+
     """
-    Shows a user's profile page, including their posts and comments.
+    Shows a user's profile page, now with pagination for posts.
     """
     
-    # 1. Get the User object.
-    # We use get_object_or_404 to find one User where their 'username'
-    # field exactly matches the 'username' captured from the URL.
-    # If no user is found, it automatically shows a 404 Page Not Found.
+    # 1. Get the User object (no change)
     profile_user = get_object_or_404(User, username=username)
     
-    # 2. Get all posts made by this user, newest first.
-    # We filter the Post model, looking for all posts where the
-    # 'author' field (our ForeignKey) is equal to the 'profile_user' object.
-    posts = Post.objects.filter(author=profile_user).order_by('-created_at')
+    # 2. Get the user's *complete* post list (no change)
+    post_list = Post.objects.filter(author=profile_user).order_by('-created_at')
     
-    # 3. Get all comments made by this user, newest first.
-    # We do the same thing for comments, filtering by the 'author' field.
+    # 3. Create a Paginator object for the posts
+    paginator = Paginator(post_list, 5) # Show 5 posts per page
+
+    # 4. Get the page number from the URL query parameter
+    page_number = request.GET.get('page')
+
+    # 5. Get the Page object for the posts
+    posts_page_obj = paginator.get_page(page_number)
+    
+    # 6. Get all comments (we won't paginate these for now)
     comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
     
-    # 4. Package all our data into a context dictionary.
-    # Note: We use 'profile_user' to distinguish this from 'user',
-    # which is the default variable for the *logged-in* user.
+    # 7. Package the context
     context = {
-        'profile_user': profile_user,  # The user whose profile we are viewing
-        'posts': posts,                # The list of their posts
-        'comments': comments,          # The list of their comments
+        'profile_user': profile_user,
+        # Pass the 'Page' object, not the full list
+        'posts_page_obj': posts_page_obj, 
+        'comments': comments,
     }
     
-    # 5. Render the new template (which we'll create next).
+    # 8. Render the template (no change)
     return render(request, 'core/profile.html', context)
 
 

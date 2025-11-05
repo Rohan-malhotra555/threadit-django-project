@@ -100,6 +100,29 @@
             text-decoration: underline;
         }
 
+        /* Styles the main pagination container */
+        .pagination {
+            text-align: center; /* Centers the links */
+            margin-top: 20px; /* Adds space above the links */
+            font-size: 0.9em;
+        }
+        
+        /* Styles the container for the links */
+        .pagination .step-links {
+            display: inline-block; /* Allows us to add padding and margins */
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        /* Styles the "Page X of Y" text */
+        .pagination .current-page {
+            margin: 0 15px; /* Adds space on either side of the text */
+            font-weight: bold;
+            color: #555;
+        }
+
     </style>
 </head>
 <body>
@@ -124,7 +147,7 @@
 
     <h2 class="activity-heading">Posts by {{ profile_user.username }}</h2>
 
-    {% for post in posts %}
+    {% for post in posts_page_obj %}
         <div class="post">
 
             <div class="vote-container">
@@ -164,6 +187,22 @@
         {% empty %}
             <p>{{ profile_user.username }} has not created any posts yet.</p>
         {% endfor %}
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if posts_page_obj.has_previous %}
+                    <a href="?page={{ posts_page_obj.previous_page_number }}">&laquo; Previous</a>
+                {% endif %}
+
+                <span class="current-page">
+                    Page {{ posts_page_obj.number }} of {{ posts_page_obj.paginator.num_pages }}
+                </span>
+
+                {% if posts_page_obj.has_next %}
+                    <a href="?page={{ posts_page_obj.next_page_number }}">Next &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
 
 
         <!--Comments section-->
