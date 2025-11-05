@@ -99,7 +99,6 @@ urlpatterns = [
 
     path('create-community/', views.create_community, name='create_community'),
 
-
     path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'), 
 
     path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
@@ -107,5 +106,7 @@ urlpatterns = [
     path('comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'), 
 
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'), 
+
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 
 ]

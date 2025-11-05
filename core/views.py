@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404 # added get_obj
 from .models import Post, Community, Comment  # added Community for the specific community search
 
 from django.contrib.auth import login
-from .forms import SignUpForm, PostForm, CommentForm, CommunityForm # <-- Import our new form
+from .forms import SignUpForm, PostForm, CommentForm, CommunityForm,EditProfileForm  # <-- Import our new form
 
 # This "decorator" is what we'll use to protect the view
 from django.contrib.auth.decorators import login_required 
@@ -644,4 +644,33 @@ def delete_comment(request, comment_id):
     # --- FIX 4 (Redirect) ---
     return redirect('post_detail', post_id=comment.post.id)
 
+
+@login_required
+def edit_profile(request):
+    """
+    Handles editing the logged-in user's profile.
+    """
+    if request.method == 'POST':
+        # Create a form instance bound to the submitted data
+        # AND the logged-in user's instance.
+        form = EditProfileForm(request.POST, instance=request.user)
+        
+        if form.is_valid():
+            # Save the changes to the existing User object.
+            form.save()
+            
+            # Redirect back to the user's profile page.
+            # We use the URL name 'profile' and pass the username.
+            return redirect('profile', username=request.user.username)
+    else:
+        # This is a GET request.
+        # Create the form, pre-filled with the user's current data.
+        form = EditProfileForm(instance=request.user)
+    
+    context = {
+        'form': form,
+    }
+    
+    # We will create this template in the next step.
+    return render(request, 'core/edit_profile.html', context)
 

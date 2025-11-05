@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms    
 
 from .models import Post, Comment, Community # importing Post to be used for the model in the Posting functionality
+from django.contrib.auth.models import User
 
 """
 You have two classes because they do two different jobs:
@@ -86,4 +87,20 @@ class CommunityForm(forms.ModelForm):
         # only show these two fields to the user.
         # 'created_at' is set automatically by the model.
         fields = ['name', 'description']
+
+
+class EditProfileForm(forms.ModelForm):
+    """
+    This is the form for editing a user's profile.
+    It's a ModelForm based on the built-in User model.
+    """
+    class Meta:
+        # model = User: Tells the form to use the built-in
+        # User model as its blueprint.
+        model = User
+        
+        # fields = ['username', 'email']: Tells the form to
+        # only show these two fields. We don't want users
+        # editing their password from this form.
+        fields = ['username', 'email']
         
