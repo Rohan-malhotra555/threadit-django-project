@@ -1,53 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up for Threadit</title>
-    <style>
-        /* CSS rules to style the page elements for a clean look */
-        body {
-            font-family: sans-serif;
-            max-width: 800px; /* Limits content width */
-            margin: 20px auto; /* Centers the content block */
-            padding: 15px;
-            background-color: #f4f4f4; /* Light grey background */
-        }
-        .form-container {
-            background-color: #fff; /* White box for the form */
-            border: 1px solid #ddd; /* Light grey border */
-            border-radius: 5px; /* Rounded corners */
-            padding: 20px; /* Space inside the box */
-        }
-        .form-container h2 {
-            margin: 0 0 15px 0; /* Space below the heading */
-        }
-        form p {
-            margin-bottom: 10px; /* Space between form fields rendered by .as_p */
-        }
-        form label {
-            display: block; /* Label appears above the input */
-            margin-bottom: 5px; /* Space below the label */
-            font-weight: bold; /* Makes label text bold */
-        }
-        form input {
-            width: 95%; /* Input box fills the container */
-            padding: 8px; /* Space inside the input box */
-            border: 1px solid #ccc; /* Input box border */
-            border-radius: 4px; /* Rounded corners */
-        }
-        button {
-            background-color: #007bff; /* Blue button background */
-            color: white; /* White button text */
-            padding: 10px 15px; /* Button size */
-            border: none; /* No default border */
-            border-radius: 4px; /* Rounded corners */
-            cursor: pointer; /* Hand cursor on hover */
-        }
-        button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-    </style>
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
 </head>
 <body>
     <div class="form-container">

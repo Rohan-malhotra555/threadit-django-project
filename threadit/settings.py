@@ -131,3 +131,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login' # written for the redirection used by the login_required decorator of posting functionality.
+
+# --- STATIC FILES CONFIGURATION ---
+# This is the URL path where Django will *serve* static files from.
+# e.g., http://example.com/static/css/style.css
+STATIC_URL = 'static/'
+
+# This tells Django to look for a folder named "static"
+# in the main project directory.
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]

@@ -1,0 +1,237 @@
+/* =================================
+   1. Global & Body Styles
+   ================================= */
+body { 
+    font-family: sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f4f4f4;
+}
+
+/* =================================
+   2. Post Feed Styles (Home, Profile, Community)
+   ================================= */
+.post { 
+    display: flex;
+    align-items: flex-start;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Left-hand voting column */
+.vote-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 15px;
+    flex-shrink: 0;
+}
+
+/* Up/down arrow links */
+.vote-link {
+    font-size: 20px;
+    text-decoration: none;
+    color: #888; /* Default grey */
+}
+.vote-link:hover {
+    color: #555;
+}
+.vote-link.voted-up {
+    color: #007bff; /* Blue */
+}
+.vote-link.voted-down {
+    color: #ff4500; /* Red-Orange */
+}
+
+/* Vote count number */
+.score {
+    font-size: 18px;
+    font-weight: bold;
+    color: #555;
+    margin: 5px 0;
+}
+
+/* Right-hand content column */
+.post-content {
+    flex-grow: 1; /* Allows the content to take up all remaining horizontal space */
+}
+.post-content h1,
+.post-content h2 { 
+    margin: 0 0 10px 0;
+}
+.post-meta { 
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* =================================
+   3. Form Page Styles (Login, Signup, Create Post/Community)
+   ================================= */
+.form-container { 
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+}
+.form-container h2 { 
+    margin: 0 0 15px 0;
+}
+form p { 
+    margin-bottom: 10px;
+}
+form label { 
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+/* This single rule styles all form inputs, textareas, and dropdowns */
+form input, 
+form textarea, 
+form select { 
+    width: 95%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+/* We can give different form textareas different heights */
+form textarea {
+    height: 100px;
+}
+form textarea[name="content"] { /* Targets the post content box */
+    height: 150px;
+}
+button { 
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover { 
+    background-color: #0056b3;
+}
+/* Styles for form validation errors (e.g., from login) */
+.errorlist { 
+    list-style: none; 
+    padding: 0; 
+    color: red; 
+    margin-bottom: 10px;
+}
+
+/* =================================
+   4. Page-Specific Headers
+   ================================= */
+/* For community_detail.html */
+.community-header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.community-header h1 { margin: 0; }
+.community-header p { margin: 5px 0 0 0; opacity: 0.9; }
+
+/* For profile.html */
+.profile-header {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.profile-header h1 { margin: 0; }
+.profile-header p { font-size: 0.9em; color: #777; margin: 5px 0 0 0; }
+
+/* For profile.html */
+.activity-heading {
+    margin-top: 30px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+/* =================================
+   5. Comment Section Styles (post_detail.html)
+   ================================= */
+.comment-form {
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.comment-list {
+    margin-top: 20px;
+}
+.comment {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-left: 3px solid #007bff;
+}
+.comment-meta { 
+    font-size: 0.8em; 
+    color: #555; 
+    font-weight: bold; 
+}
+
+/* =================================
+   6. Action Links (Edit/Delete for Posts & Comments)
+   ================================= */
+/* This single set of rules styles both .post-actions and .comment-actions */
+.post-actions,
+.comment-actions {
+    margin-top: 15px;
+    font-size: 0.9em;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+.post-actions a,
+.comment-actions a {
+    font-size: 0.9em;
+    font-weight: bold;
+    text-decoration: none;
+    color: #007bff;
+    margin-right: 15px;
+}
+/* This targets the "Delete" link specifically */
+.post-actions a:last-child,
+.comment-actions a:last-child {
+    color: #dc3545; /* Red */
+}
+.post-actions a:hover,
+.comment-actions a:hover {
+    text-decoration: underline;
+}
+
+
+/* =================================
+   7. Pagination Styles
+   ================================= */
+/* This targets both .pagination (from profile) and .paginator (from home) */
+.pagination, .paginator {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+.pagination .step-links,
+.paginator .step-links {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+}
+.pagination .current-page,
+.paginator .current-page {
+    margin: 0 15px;
+    font-weight: bold;
+    color: #555;
+}

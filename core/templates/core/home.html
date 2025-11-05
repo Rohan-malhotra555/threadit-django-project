@@ -1,3 +1,5 @@
+{% load static %}
+
 <!-- This is a "doctype" declaration. It's a standard line that tells the
      web browser "This is a modern HTML5 document." -->
 <!DOCTYPE html>
@@ -24,100 +26,9 @@
     <!-- This is an "Internal Style Sheet." We are writing CSS code
          directly inside our HTML file. Later, we will move this to
          its own .css file, but this is perfect for now. -->
-    <style>
-        /* This sets the style for the entire <body> (the whole page) */
-        body { 
-            font-family: sans-serif;  /* Use a clean, standard font */
-            max-width: 800px;         /* Don't let the content get too wide on big screens */
-            margin: 20px auto;        /* '20px' top/bottom, 'auto' left/right (this centers the 800px block) */
-            padding: 15px;            /* Add some space inside the main content area */
-            background-color: #f4f4f4; /* A light grey background color */
-        }
-        
-        /* This is the main container for a single post */
-        .post { 
-            display: flex; /* This is the key: makes children (.vote-container, .post-content) sit side-by-side */
-            align-items: flex-start; /* Aligns items to the top */
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        /* This styles the left-hand voting column */
-        .vote-container {
-            display: flex; /* Makes the items inside this (arrows, score) flexible */
-            flex-direction: column; /* Stacks the items vertically */
-            align-items: center;  /* Centers them horizontally */
-            padding-right: 15px; /* Adds space between voting and content */
-            flex-shrink: 0; /* Stops this column from shrinking */
-        }
-        
-        /* This styles the up/down arrow links */
-        .vote-link {
-            font-size: 20px; /* Makes arrows bigger */
-            text-decoration: none; /* Removes the underline */
-            color: #888; /* Grey color */
-        }
-        .vote-link:hover {
-            color: #555; /* Blue on hover */
-        }
-
-        .vote-link.voted-up {
-            color: #007bff;
-        }
-
-        .vote-link.voted-down {
-            color: #ff4500;
-        }
-        
-        /* This styles the vote count number */
-        .score {
-            font-size: 18px;
-            font-weight: bold;
-            color: #555;
-            margin: 5px 0; /* Adds vertical space around the score */
-        }
-        
-        /* This styles the right-hand content column */
-        .post-content {
-            flex-grow: 1; /* Allows the content to take up all remaining horizontal space */
-        }
-
-        /* Styles for the text inside the post-content */
-        .post-content h2 { 
-            margin: 0 0 10px 0;
-        }
-        .post-meta { 
-            font-size: 0.9em;
-            color: #777;
-        }
-
-        /* This styles the main pagination container div */
-        .paginator {
-            text-align: center; /* Centers the links */
-            margin-top: 20px; /* Adds space above the links */
-            font-size: 0.9em;
-        }
-        
-        /* This styles the <span> that wraps the links */
-        .paginator .step-links {
-            display: inline-block; /* Allows us to add padding and margins */
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            background-color: #fff;
-            border-radius: 4px;
-        }
-
-        /* This styles the "Page X of Y" text */
-        .paginator .current-page {
-            margin: 0 15px; /* Adds space on either side of the text */
-            font-weight: bold;
-            color: #555;
-        }
-        
-    </style>
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
 </head>
 
 <!-- The <body> tag holds all the actual content the user will see
