@@ -126,6 +126,14 @@
                     by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
                 </p>
 
+                {% if post.image %}
+
+                    <div class="post-image-container">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                    </div>
+                
+                {% endif %}
+
                 <!-- This just prints the 'content' field of the post -->
                 {% if post.content %}
 

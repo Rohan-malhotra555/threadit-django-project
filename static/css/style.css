@@ -235,3 +235,10 @@ button:hover {
     font-weight: bold;
     color: #555;
 }
+
+.post-image-container img {
+    max-width: 100%; /* Ensures image is never wider than its container */
+    height: auto;    /* Maintains aspect ratio */
+    border-radius: 5px;
+    margin-top: 10px;
+}

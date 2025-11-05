@@ -15,8 +15,6 @@
 
     <div class="community-header">
 
-
-
         <h1>Welcome to c/{{ community.name }}</h1>
 
         <p>{{ community.description }}</p>
@@ -53,6 +51,14 @@
                     Posted on {{ post.created_at|date:"F d, Y" }}
                     by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
                 </p>
+
+                {% if post.image %}
+
+                    <div class="post-image-container">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                    </div>
+                
+                {% endif %}
 
                 <p> {{ post.content }}</p>
 

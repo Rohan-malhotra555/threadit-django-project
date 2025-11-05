@@ -18,6 +18,9 @@ from django.contrib import admin
 # 1. You MUST import the 'include' function
 from django.urls import path, include
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -28,3 +31,20 @@ urlpatterns = [
     path('', include('core.urls')),
 
 ]
+
+if settings.DEBUG:
+    
+    urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+
+"""
+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT): This 
+is the magic. It creates a new URL pattern that says, "When a request 
+comes in for a URL starting with MEDIA_URL (/media/), look for the file 
+in the MEDIA_ROOT folder (threadit-django-project/media/)."
+"""
+
+"""
+the STATIC AND MEDIA URL are used as prefix in the urls given by the users 
+web browsers and the BASE DIR FOLDERS help in navigating and serving these 
+files
+"""

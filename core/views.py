@@ -187,7 +187,7 @@ def create_post(request):
     if request.method == 'POST':
         # This is a POST request. User is submitting the form.
         # Create a form instance and fill it with the submitted data
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         
         # Check if the form's data is valid
         if form.is_valid():
@@ -519,7 +519,7 @@ def edit_post(request, post_id):
         # This is a POST request. User is submitting the edited form.
         # We fill the PostForm with the new data from request.POST
         # AND we link it to the existing 'post' object using 'instance=post'.
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(request.POST, request.FILES, instance=post)
         
         if form.is_valid():
             # The form is valid! Save the changes to the *existing* post.

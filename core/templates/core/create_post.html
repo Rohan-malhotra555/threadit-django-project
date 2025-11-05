@@ -21,7 +21,7 @@
 
         <!-- This is the HTML form tag.
              method="POST" is crucial for sending the new post data. -->
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             
             <!-- Django's mandatory CSRF security token. -->
             {% csrf_token %}

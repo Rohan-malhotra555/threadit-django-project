@@ -142,3 +142,16 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# --- MEDIA FILES (User Uploaded) CONFIGURATION ---
+
+# 1. MEDIA_URL: The public-facing URL for media files.
+#    Just like STATIC_URL, this is the web address browsers will use
+#    to request user-uploaded images (e.g., /media/post_images/my_image.jpg).
+MEDIA_URL = '/media/'
+
+# 2. MEDIA_ROOT: The private folder on your computer's hard drive
+#    where Django will *actually save* all user-uploaded files.
+#    BASE_DIR / 'media' tells Django to create a folder named "media"
+#    in your main project directory (alongside 'static' and 'core').
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -60,6 +60,14 @@
 
                 </p>
 
+                {% if post.image %}
+
+                    <div class="post-image-container">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                    </div>
+                
+                {% endif %}
+
                 {% if user == post.author %}
                     <div class="post-actions">
                         <a href="{% url 'edit_post' post.id %}">Edit</a>

@@ -49,6 +49,12 @@ class Post(models.Model):
     # We do the same for downvotes.
     downvotes = models.ManyToManyField(User, related_name='post_downvotes', blank=True)
 
+    # upload_to='post_images/': This tells Django where to save the images.
+    #   It will save them to 'MEDIA_ROOT/post_images/'
+    # blank=True, null=True: This makes the image optional.
+    #   A user can create a post *without* uploading an image.
+    image = models.ImageField(upload_to='post_image/', blank=True, null=True)
+
     @property
     def score(self):
 

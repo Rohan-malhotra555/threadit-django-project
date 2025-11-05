@@ -41,6 +41,14 @@
                 on {{ post.created_at|date:"F d, Y" }}
             </p>
 
+            {% if post.image %}
+
+                <div class="post-image-container">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                </div>
+                
+            {% endif %}
+
             <p>{{ post.content }}</p>
 
             {% if user == post.author %}

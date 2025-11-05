@@ -43,7 +43,7 @@ class PostForm(forms.ModelForm):
         # to show to the user.
         # We only want them to edit the title, content, and community.
         # The 'author' and 'created_at' will be set automatically.
-        fields = ['title', 'content', 'community']
+        fields = ['title', 'content', 'community', 'image']
 
 """
 
