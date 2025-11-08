@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+import os
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,10 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yz4%$d!bb0z$p@2_&%_8+p7!hudnn2ub@gez*01j@!5%m63)c1'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-yz4%$d!bb0z$p@2_&%_8+p7!hudnn2ub@gez*01j@!5%m63)c1')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
 
@@ -82,6 +87,16 @@ DATABASES = {
     }
 }
 
+# This is the "production switch" for your database.
+# It looks for the Neon database URL in Render's "key safe".
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # If it finds the Neon key, it uses dj-database-url (the "translator")
+    # to configure your live PostgreSQL database.
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=600,
+        ssl_require=True
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -155,3 +170,17 @@ MEDIA_URL = '/media/'
 #    BASE_DIR / 'media' tells Django to create a folder named "media"
 #    in your main project directory (alongside 'static' and 'core').
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# This automatically finds your live app's URL (e.g., threadit-app.onrender.com)
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# We also add 'localhost' so you can still work on your laptop
+ALLOWED_HOSTS.append('127.0.0.1')
+
+# --- ADD THIS LINE (This is the fix for your error) ---
+# This is the "Shipping Crate" folder.
+# 'collectstatic' will copy all CSS/JS files into this one folder
+# for the production server (gunicorn) to use.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
