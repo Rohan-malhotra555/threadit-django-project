@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-yz4%$d!bb0z$p@2_&%_8+
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+# DEBUG = True # this was the previous state
 DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -159,6 +162,23 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+
+# This automatically finds your live app's URL (e.g., threadit-app.onrender.com)
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# We also add 'localhost' so you can still work on your laptop
+ALLOWED_HOSTS.append('127.0.0.1')
+
+
+# This is the "Shipping Crate" folder.
+# 'collectstatic' will copy all CSS/JS files into this one folder
+# for the production server (gunicorn) to use.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # --- MEDIA FILES (User Uploaded) CONFIGURATION ---
 
 # 1. MEDIA_URL: The public-facing URL for media files.
@@ -172,18 +192,9 @@ MEDIA_URL = '/media/'
 #    in your main project directory (alongside 'static' and 'core').
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# This automatically finds your live app's URL (e.g., threadit-app.onrender.com)
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# We also add 'localhost' so you can still work on your laptop
-ALLOWED_HOSTS.append('127.0.0.1')
-
-# --- ADD THIS LINE (This is the fix for your error) ---
-# This is the "Shipping Crate" folder.
-# 'collectstatic' will copy all CSS/JS files into this one folder
-# for the production server (gunicorn) to use.
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# This tells Django to use Cloudinary for all file uploads
+# *only* when we are in production (when DEBUG is False).
+# When DEBUG is True (on your laptop), it will still use
+# your local 'media' folder, which is perfect for testing.
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
