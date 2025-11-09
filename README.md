@@ -109,7 +109,7 @@ To run this project on your local machine, follow these steps:
 ## 👤 Author
 
 * **Rohan Malhotra**
-    * [LinkedIn](www.linkedin.com/in/rohan-malhotra-0b6327251)
+    * [LinkedIn]([www.linkedin.com/in/rohan-malhotra-0b6327251](https://www.linkedin.com/in/rohan-malhotra-0b6327251/))
     * [GitHub](https://github.com/Rohan-malhotra555)
 
 ---
