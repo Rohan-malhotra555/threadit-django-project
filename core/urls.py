@@ -41,13 +41,17 @@ urlpatterns = [
     # We use Django's built-in LoginView.
     # We need to tell it which template to use for the login form.
     # .as_view is used to convert the class LoginView to a callable function for the url pattern.
-    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    # path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),  # old one, now we are using the redirected 
+    # #template folder, not the old hidden one
+
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
 
     # Path for the logout action
     # We use Django's built-in LogoutView.
     # By default, it redirects to the LOGOUT_REDIRECT_URL setting (or admin page).
     # We don't need a template for logout itself, it's just an action.
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # path('logout/', auth_views.LogoutView.as_view(), name='logout'), # older url, manual work is done
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 
     # Path for the community detail page (Dynamic URL)
     #
@@ -82,7 +86,7 @@ urlpatterns = [
     # integer and passes it to the view as a variable named 'post_id'.
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
 
-# Path for upvoting a post
+    # Path for upvoting a post
     # This will be triggered when a user clicks an upvote link
     # e.g., /post/5/upvote/
     path('post/<int:post_id>/upvote/', views.upvote_post, name='upvote_post'),
@@ -108,5 +112,9 @@ urlpatterns = [
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'), 
 
     path('profile/edit/', views.edit_profile, name='edit_profile'),
+
+    ################################################################################################
+
+    path('register/', views.register, name='register'),
 
 ]

@@ -1,0 +1,26 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4>Join Threadit</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    {{ form.as_p }}
+                    
+                    <button type="submit" class="btn btn-success w-100 mt-3">Register</button>
+                </form>
+            </div>
+            <div class="card-footer text-center text-muted">
+                <small>Already have an account? <a href="{% url 'login' %}">Login</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

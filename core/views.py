@@ -11,7 +11,7 @@ from django.contrib.auth.models import User # for the user profile page
 
 from django.core.paginator import Paginator # for the creation of the pages in home page. 
 
-
+from django.contrib.auth.forms import UserCreationForm # for the register functionality
 
 
 def home(request):
@@ -34,7 +34,7 @@ def home(request):
     """
 
     # 1. Get the list of ALL posts, in order (no change here).
-    #    This is the "master list" we will paginate.
+    #    This is the "master list" we will paginate. (descending)
     post_list = Post.objects.all().order_by('-created_at')
 
     # 2. Create a Paginator object.
@@ -66,7 +66,7 @@ def home(request):
 
 
     # 3. Render the HTML page (home.html) and send it back
-    return render(request, 'core/home.html', context)
+    return render(request, 'home.html', context)
 
 
 # The Signup class
@@ -225,7 +225,7 @@ def create_post(request):
     }
     
     # Render the 'create_post.html' template (we'll make this next)
-    return render(request, 'core/create_post.html', context)
+    return render(request, 'create_post.html', context)
 
 
 
@@ -541,7 +541,7 @@ def edit_post(request, post_id):
     
     # 5. Render the template. We can REUSE our 'create_post.html'
     #    template for this, as it just shows a form.
-    return render(request, 'core/create_post.html', context)
+    return render(request, 'create_post.html', context)
 
 
 # --- ADD THIS NEW FUNCTION FOR DELETING ---
@@ -674,3 +674,54 @@ def edit_profile(request):
     # We will create this template in the next step.
     return render(request, 'core/edit_profile.html', context)
 
+
+
+
+################################################################################################
+
+
+def register(request):
+
+    if request.method == 'POST':
+
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+
+            form.save()
+            return redirect('login')
+        
+    else:
+
+        form = UserCreationForm()
+
+    return render(request, 'register.html', {'form': form})
+
+
+
+# @login_required
+# def create_post(request):
+
+#     if request.method == 'POST':
+
+#         form = PostForm(request.POST, request.FILES)
+
+#         if form.is_valid():
+
+#             post = form.save(commit=False)
+
+#             post.author = request.user
+#             post.save()
+
+#             return redirect('home')
+        
+#     else:
+
+#         form = PostForm()
+
+#     context = {
+
+#         'form': form,
+#     }
+
+#     return render(request, 'create_post.html', context)

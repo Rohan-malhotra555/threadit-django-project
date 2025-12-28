@@ -56,7 +56,12 @@
                 <div class="post-actions">
                     <a href="{% url 'edit_post' post.id %}">Edit</a>
 
-                    <a href="{% url 'delete_post' post.id %}">Delete</a>
+                    <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background:none; border:none; padding:0; color:blue; text-decoration:underline; cursor:pointer;">
+                            Delete
+                        </button>
+                    </form>
                 </div>
 
             {% endif %}

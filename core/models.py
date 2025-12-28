@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-#This is the model for our "Subreddit"
+# This is the model for our "Subreddit"
+# models.Model turns your Python class into a Django database table with superpowers.
 class Community(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
@@ -28,7 +29,7 @@ class Post(models.Model):
     # One Community can have MANY Posts.
     # on_delete=models.CASCADE means: "If a Community is deleted, delete all its Posts too."
 
-    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)
 
     # --- 2. ADD THIS NEW FIELD --- Adding this feature for the Posting functionality.
     # This links every Post to a User.
@@ -44,6 +45,8 @@ class Post(models.Model):
     # Forward name: upvotes (the field name you wrote on the Post model).
 
     # Reverse name: post_upvotes (the related_name you specified, which gets attached to the User model).
+    # post.upvotes.all() → “Who liked this post?”
+    # user.post_upvotes.all() → “Which posts did this user like?”
     upvotes = models.ManyToManyField(User, related_name='post_upvotes', blank=True)
 
     # We do the same for downvotes.
@@ -102,4 +105,125 @@ above line.
 now, when we say post.author.username, it actually means post's 
 author which is the link to the User model, now we want user's 
 username so the chain follows up.
+"""
+
+
+"""
+
+To explain this from scratch, imagine you are running a **Library**.
+
+A library has two things:
+
+1. **The Bookshelves:** Where the physical books are kept.
+2. **The Computer Catalog:** A list that tells you *where* the book is (e.g., "Row 5, Shelf B").
+
+**Django works exactly the same way:**
+
+1. **The Media Folder (Bookshelf):** This is where the actual image file (JPEGs/PNGs) sits on your hard drive.
+2. **The Database (Catalog):** This only stores the **address** of the image (e.g., `/media/post_images/cat.jpg`).
+
+Here is the step-by-step recipe to add image functionality to a Django project.
+
+### Step 1: Tell Django where the "Bookshelf" is (Settings.py)
+
+Before you can upload anything, you must tell Django where to put the files on your computer.
+
+Open `settings.py` and add these two lines at the bottom:
+
+```python
+# MEDIA_ROOT: The actual folder on your laptop where files are saved.
+# We join 'BASE_DIR' (project folder) with a new folder name 'media'.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# MEDIA_URL: The web address users type to see the image.
+# http://127.0.0.1:8000/media/dog.jpg
+MEDIA_URL = '/media/'
+
+```
+
+### Step 2: Create the "Catalog Entry" (Models.py)
+
+Now you need a column in your database to remember the filename.
+
+Open `models.py`:
+
+```python
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    # upload_to='post_images/' tells Django: 
+    # "Inside the Media folder, make a sub-folder called post_images and put it there."
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
+
+```
+
+* *Note:* You usually need to install a library called Pillow for this to work (`pip install Pillow`), because Python doesn't know how to handle images by default.
+
+### Step 3: The "Magic" URL (Urls.py) - *The Most Confusing Part*
+
+This is the step everyone forgets. By default, Django **refuses** to show images from your hard drive for security reasons. You have to explicitly tell it to allow this during development.
+
+Open `urls.py` (the main one):
+
+```python
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    # ... your other paths ...
+]
+
+# This checks: "Are we in development mode (DEBUG=True)?" 
+# If yes, "Add a special URL path that lets the browser look inside MEDIA_ROOT."
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+```
+
+**Without this code, your image uploads, but the image will look "broken" on the website.**
+
+### Step 4: The Delivery Truck (The HTML Form)
+
+Now the frontend. Standard HTML forms are designed to send **text**, not heavy files. You have to upgrade the form.
+
+Open your template (e.g., `create_post.html`):
+
+```html
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+</form>
+
+```
+
+### Step 5: The Receptionist (Views.py)
+
+Finally, you catch the data in your view.
+
+Open `views.py`:
+
+```python
+def create_post(request):
+    if request.method == 'POST':
+        # Request.POST contains the text (title).
+        # Request.FILES contains the image.
+        # YOU MUST INCLUDE BOTH!
+        form = PostForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            form.save() # Django automatically saves the file to the folder AND the path to the DB.
+
+```
+
+---
+
+### Summary of the Flow
+
+1. **User** selects `cat.jpg` and clicks Submit.
+2. **Browser** sends the file because of `enctype`.
+3. **View** receives `request.FILES`.
+4. **Django** looks at `MEDIA_ROOT` and saves `cat.jpg` into your `media` folder.
+5. **Django** looks at the Database and saves the text `"post_images/cat.jpg"` in the `image` column.
+6. **Browser** requests the image later, and `urls.py` directs it to the right folder.
+
 """

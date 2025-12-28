@@ -11,6 +11,16 @@ SignUpForm (Outer): Defines the features (the bricks).
 
 Meta (Inner): Defines the configuration (the instructions for how to use the bricks).
 """
+
+# UserCreationForm is a built-in Django form used to create new users.
+
+# It already includes:
+# username
+# password1
+# password2 (for confirmation)
+# So instead of writing a form from scratch, 
+# you can just extend UserCreationForm to customize it.
+
 class SignUpForm(UserCreationForm):
 
     # We are adding an email field and making it required.
@@ -29,21 +39,25 @@ class SignUpForm(UserCreationForm):
 
 # --- 2. ADD THIS NEW CLASS --- this comes under the content posting functionality.
 
-class PostForm(forms.ModelForm):
-    """
-    This is the form for creating a new Post.
-    We use forms.ModelForm to automatically build a form
-    from our Post model.
-    """
-    class Meta:
-        # 'model' tells the ModelForm which model to use.
-        model = Post
+# ModelForm is a Django class that creates a form based on a database model.
+# Instead of manually defining fields and validation, you can tell Django:
+
+# The below one is the old PostForm (without bootstrap)
+# class PostForm(forms.ModelForm):
+#     """
+#     This is the form for creating a new Post.
+#     We use forms.ModelForm to automatically build a form
+#     from our Post model.
+#     """
+#     class Meta:
+#         # 'model' tells the ModelForm which model to use.
+#         model = Post
         
-        # 'fields' tells the form which fields from the model
-        # to show to the user.
-        # We only want them to edit the title, content, and community.
-        # The 'author' and 'created_at' will be set automatically.
-        fields = ['title', 'content', 'community', 'image']
+#         # 'fields' tells the form which fields from the model
+#         # to show to the user.
+#         # We only want them to edit the title, content, and community.
+#         # The 'author' and 'created_at' will be set automatically.
+#         fields = ['title', 'content', 'community', 'image']
 
 """
 
@@ -104,3 +118,22 @@ class EditProfileForm(forms.ModelForm):
         # editing their password from this form.
         fields = ['username', 'email']
         
+
+
+#################################################################
+
+class PostForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Post
+        fields = ['title', 'content', 'image']
+
+        widgets = {
+
+            # This 'widgets' part adds Bootstrap classes to the inputs automatically!
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'What is on your mind?'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+
+        }

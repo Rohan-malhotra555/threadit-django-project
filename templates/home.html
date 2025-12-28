@@ -1,41 +1,88 @@
-{% load static %}
 
-<!-- This is a "doctype" declaration. It's a standard line that tells the
-     web browser "This is a modern HTML5 document." -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <h2 class="mb-4">Recent Discussions</h2>
+        
+        {% for post in page_obj %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Posted by <span class="fw-bold text-dark">{{ post.author.username }}</span>
+                    
+                    {% if post.community %}
+                        in <span class="badge bg-primary">{{ post.community.name }}</span>
+                    {% endif %}
+                </small>
+                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+            </div>
+
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ post.title }}</h5>
+                <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="img-fluid rounded mt-2 mb-2" style="width: 100%; height: auto;">                {% endif %}
+            </div>
+            
+            <div class="card-footer bg-white">
+                <a href="#" class="btn btn-sm btn-outline-secondary">Read More</a>
+                <span class="ms-3 text-muted"> <i class="bi bi-arrow-up"></i> {{ post.upvotes.count }} Upvotes</span>
+            </div>
+        </div>
+        {% empty %}
+            <div class="alert alert-info text-center">
+                No posts yet. Be the first to create one!
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+<!-- {% load static %}
+
+This is a "doctype" declaration. It's a standard line that tells the
+     web browser "This is a modern HTML5 document."
 <!DOCTYPE html>
 
-<!-- This is the root tag. All of your HTML code goes inside this.
-     lang="en" just tells the browser the page is in English. -->
+This is the root tag. All of your HTML code goes inside this.
+     lang="en" just tells the browser the page is in English.
 <html lang="en">
 
-<!-- The <head> tag holds "meta-information" about your page. This is
-     stuff the user doesn't see (like the title in the browser tab). -->
+The <head> tag holds "meta-information" about your page. This is
+     stuff the user doesn't see (like the title in the browser tab).
 <head>
-    <!-- This tells the browser to use the UTF-8 character set, which
-         is a standard that includes all emojis and special characters. -->
+     This tells the browser to use the UTF-8 character set, which
+         is a standard that includes all emojis and special characters.
     <meta charset="UTF-8">
 
-    <!-- This is a critical line for mobile phones. It tells the phone
+     This is a critical line for mobile phones. It tells the phone
          to set the width of the page to the device's screen width.
-         This is what makes a website "responsive." -->
+         This is what makes a website "responsive."
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- This is the text that appears in the browser tab. -->
+     This is the text that appears in the browser tab.
     <title>Welcome to Threadit</title>
 
-    <!-- This is an "Internal Style Sheet." We are writing CSS code
+     This is an "Internal Style Sheet." We are writing CSS code
          directly inside our HTML file. Later, we will move this to
-         its own .css file, but this is perfect for now. -->
+         its own .css file, but this is perfect for now.
     
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
 </head>
 
-<!-- The <body> tag holds all the actual content the user will see
-     (text, images, links, etc.) -->
+ The <body> tag holds all the actual content the user will see
+     (text, images, links, etc.)
 <body>
 
-    <!-- A main heading for the page -->
+     A main heading for the page
     <h1>Welcome to Threadit</h1>
 
     <div>
@@ -55,12 +102,12 @@
 
     </div>
     
-    <!-- <hr> just means "horizontal rule," a simple dividing line. -->
+     <hr> just means "horizontal rule," a simple dividing line.
     <hr>
 
     <h2>All Posts</h2>
 
-    <!--
+    
       DJANGO TEMPLATE LANGUAGE (DTL) STARTS HERE
       This is not HTML. This is a command for Django.
       {perc ... perc} is a "Tag." It does something (like a loop or an if-statement).
@@ -68,18 +115,18 @@
       This line says: "Find the 'posts' variable from the context dictionary
       we passed from the view. Then, loop through every item in that list.
       For each item, temporarily call it 'post'."
-    -->
+    
     {% for post in page_obj %}
 
-        <!-- This is a standard HTML div. We give it a class of "post"
-             so it gets the styles we defined in the <style> tag above. -->
+        This is a standard HTML div. We give it a class of "post"
+             so it gets the styles we defined in the <style> tag above.
         <div class="post">
 
-            <!--
+            
               {{ ... }} is a "Variable Tag." It means "print something."
               This line tells Django: "Get the current 'post' from the loop
               and print its 'title' field."
-            -->
+            
 
             <div class="vote-container">
 
@@ -98,17 +145,17 @@
 
                 <p class="post-meta">
                     Posted in <a href=" {% url 'community_detail' post.community.name %}">
-                        <!--
+                        
                         Here, we print the 'post.community'.
                         Because of your `def __str__` method in models.py,
                         Django is smart enough to print the *name* of the
                         community (e.g., "python") instead of a
                         confusing ID (e.g., "1").
-                        -->
+                        
                         {{ post.community }}
                     </a> 
                     on 
-                    <!--
+                    
                     Here we print the 'created_at' timestamp.
                     The | is a "Filter." It formats the data.
                     |date:"F d, Y" tells Django to format the date
@@ -121,7 +168,7 @@
                         d: Day of the month, with leading zero (e.g., "05", "26")
 
                         Y: Four-digit year (e.g., "2025")
-                    -->
+                    
                     {{ post.created_at|date:"F d, Y" }} 
                     by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
                 </p>
@@ -134,7 +181,7 @@
                 
                 {% endif %}
 
-                <!-- This just prints the 'content' field of the post -->
+                 This just prints the 'content' field of the post 
                 {% if post.content %}
 
                     <p>{{ post.content }}</p>
@@ -144,11 +191,11 @@
 
         </div>
 
-    <!--
+    
       This tag tells Django: "The loop ends here."
       It will repeat everything between here and the {for} tag
       for every single post in your list.
-    -->
+    
     {% endfor %}
 
     <div class="paginator">
@@ -172,4 +219,4 @@
     </div>
 
 </body>
-</html>
+</html> -->

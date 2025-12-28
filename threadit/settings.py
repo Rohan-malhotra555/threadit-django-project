@@ -65,8 +65,8 @@ ROOT_URLCONF = 'threadit.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True, #this means that django will look for the hidden template folder we create (the template/core)
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
