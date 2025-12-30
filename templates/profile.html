@@ -1,124 +1,74 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ profile_user.username }}'s Profile</title>
+{% extends 'base.html' %}
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body text-center">
+                <img src="{{ profile_user.profile.profile_image.url }}" class="rounded-circle img-thumbnail mb-3"
+                    style="width: 150px; height: 150px; object-fit: cover;">
 
-    
-</head>
-<body>
+                <h3>u/{{ profile_user.username }}</h3>
 
-    <p><a href="{% url 'home' %}">&laquo; Back to All Posts</a></p>
+                {% if profile_user.profile.bio %}
+                <p class="text-muted">{{ profile_user.profile.bio }}</p>
+                {% else %}
+                <p class="text-muted small">No bio yet.</p>
+                {% endif %}
 
-    <div class="profile-header">
+                {% if profile_user.profile.location %}
+                <p class="small text-muted">📍 {{ profile_user.profile.location }}</p>
+                {% endif %}
 
-        <h1>{{ profile_user.username }}</h1>
-
-        <p>Member since {{ profile_user.date_joined|date:"F d, Y" }}</p>
-
-        {% if user == profile_user %}
-
-            <p><a href="{% url 'edit_profile' %}">Edit Profile</a></p>
-        
-        {% endif %}
-
+                {% if request.user == profile_user %}
+                <hr>
+                <a href="#" class="btn btn-outline-primary btn-sm w-100">Edit Profile</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <!--Posts section-->
+    <div class="col-md-8">
 
-    <h2 class="activity-heading">Posts by {{ profile_user.username }}</h2>
-
-    {% for post in posts_page_obj %}
-        <div class="post">
-
-            <div class="vote-container">
-
-                <a href="{% url 'upvote_post' post.id %}?next={{ request.path }}"
-                class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
-
-                <p class="score"> {{ post.score }}</p>
-
-                <a href="{% url 'downvote_post' post.id %}?next={{ request.path }}"
-                class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
-
-            </div>
-
-            <div class="post-content">
-
-                <h2>
-                    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-                </h2>
-
-                <p class="post-meta">
-
-                    Posted in <a href="{% url 'community_detail' post.community.name %}">{{ post.community.name }}</a>
-                    on {{ post.created_at|date:"F d, Y" }}
-
-                </p>
-
-                {% if post.image %}
-
-                    <div class="post-image-container">
-                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
-                    </div>
-                
-                {% endif %}
-
-                {% if user == post.author %}
-                    <div class="post-actions">
-                        <a href="{% url 'edit_post' post.id %}">Edit</a>
-                        <a href="{% url 'delete_post' post.id %}">Delete</a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {% empty %}
-            <p>{{ profile_user.username }} has not created any posts yet.</p>
-        {% endfor %}
-
-        <div class="pagination">
-            <span class="step-links">
-                {% if posts_page_obj.has_previous %}
-                    <a href="?page={{ posts_page_obj.previous_page_number }}">&laquo; Previous</a>
-                {% endif %}
-
-                <span class="current-page">
-                    Page {{ posts_page_obj.number }} of {{ posts_page_obj.paginator.num_pages }}
-                </span>
-
-                {% if posts_page_obj.has_next %}
-                    <a href="?page={{ posts_page_obj.next_page_number }}">Next &raquo;</a>
-                {% endif %}
-            </span>
-        </div>
-
-
-        <!--Comments section-->
-
-        <h2 class="activity-heading">Comments by {{ profile_user.username }}</h2>
-
-        {% for comment in comments %}
-
-            <div class="comment">
-
-                <p class="comment-meta">
-                    Commented on <a href="{% url 'post_detail' comment.post.id %}">
-                        {{ comment.post.title }}
+        <h4 class="mb-3">Posts</h4>
+        {% for post in posts %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'post_detail' post.id %}" class="text-decoration-none">
+                        {{ post.title }}
                     </a>
-                    - {{ comment.created_at|date:"f A, F d, Y" }}
-                </p>
-
-                <p>{{ comment.content }}</p>
+                </h5>
+                <h6 class="card-subtitle mb-2 text-muted small">
+                    {% if post.community %}
+                    Posted in <a href="{% url 'community_detail' post.community.slug %}" class="text-decoration-none">
+                        <span class="badge bg-primary">r/{{ post.community.name }}</span>
+                    </a>
+                    {% else %}
+                    <span class="badge bg-secondary">General</span>
+                    {% endif %}
+                    • {{ post.upvotes.count }} upvotes
+                </h6>
             </div>
-
+        </div>
         {% empty %}
-            <p>{{ profile_user.username }} has not made any comments yet.</p>
+        <div class="alert alert-light">This user hasn't posted anything yet.</div>
         {% endfor %}
-    
-</body>
-</html>
+
+        <h4 class="mb-3 mt-5">Comments</h4>
+        {% for comment in comments %}
+        <div class="card mb-3 bg-light">
+            <div class="card-body py-2">
+                <p class="mb-1 text-muted small">
+                    Commented on <a href="{% url 'post_detail' comment.post.id %}">{{ comment.post.title }}</a>:
+                </p>
+                <p class="mb-0">"{{ comment.content }}"</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-light">This user hasn't commented on anything yet.</div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

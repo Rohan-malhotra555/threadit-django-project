@@ -3,6 +3,11 @@ from django.db import models
 # --- 1. ADD THIS IMPORT ---
 # Import the built-in User model from Django's authentication system
 from django.contrib.auth.models import User
+from django.utils.text import slugify
+
+# in order to create and sync the profile functionality, below imports are done
+from django.db.models.signals import post_save
+from django.dispatch import receiver 
 
 # Create your models here.
 
@@ -11,8 +16,18 @@ from django.contrib.auth.models import User
 class Community(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
+
+    slug = models.SlugField(unique=True)
     description = models.TextField(blank=True) # blank=True means this field is optional
     created_at = models.DateTimeField(auto_now_add=True) # Automatically sets the time when created
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+
+            self.slug = slugify(self.name)
+        
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -81,14 +96,149 @@ class Comment(models.Model):
 
     # This links the Comment to the Post it's replying to.
     # If a Post is deleted, all its comments are deleted too.
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
 
     def __str__(self):
         # This will make the admin panel show the first 50 characters
         # of the comment, so it's easy to identify.
         # on the first 50 characters will be shown as the 'name'.
-        return self.content[:50]
+        return f"Comment by {self.author} on {self.post}"
     
+
+class Profile(models.Model):
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+
+    profile_image = models.ImageField(default='default.jpg', upload_to='profile_images')
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+    
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+
+    if created:
+
+        Profile.objects.create(user=instance)
+    
+@receiver(post_save, sender=User)
+def save_profile(sender, instance, **kwargs):
+
+    instance.profile.save()
+
+
+
+
+
+
+"""
+1. The Logic: "The Automatic Shadow"
+
+Imagine you are a god creating a human (The User). You want every human to have a Shadow (The Profile) the moment they are born.
+
+Without Signals (The Manual Way):
+
+You create Human "Bob".
+
+...Bob has no shadow yet...
+
+You have to remember to perform a second spell: "Create Shadow for Bob."
+
+Risk: If you forget step 3, Bob walks around shadowless (and your app crashes).
+
+With Signals (The Automatic Way):
+
+You attach a magical rule to the universe: "Whenever a Human is born, instantly cast the Shadow spell."
+
+You create Human "Bob".
+
+The shadow appears automatically. You don't have to do anything else.
+
+That is all this code is doing. It is an Automatic Trigger.
+
+2. The Code: Word-by-Word Breakdown 🔍
+
+Now, let's look at the "spell" we are writing.
+
+Function 1: The Creation
+
+Python
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+Line 1: @receiver(post_save, sender=User)
+
+@receiver: Think of this as a Radio Antenna. It is waiting for a signal.
+
+post_save: This is the specific signal frequency. It means "After Save". Django shouts this signal every time anything is saved to the database.
+
+sender=User: This is a filter. The Antenna ignores signals from Posts or Comments. It says: "I only care if the signal comes from the User table."
+
+Translation: "Hey Python, keep your ears open. Whenever a User is saved to the database, run the function below."
+
+Line 2: def create_profile(sender, instance, created, **kwargs):
+
+This is the function that runs when the signal is caught. Django automatically passes it some data:
+
+sender: Who sent the signal? (The User class).
+
+instance: The most important part. This is the specific user that was just saved. (e.g., "Alice").
+
+created: This is a True/False switch.
+
+True: If Alice is brand new (Just signed up).
+
+False: If Alice already existed (e.g., she just changed her password).
+
+**kwargs: "Keyword Arguments". This is just a bucket for any extra data we don't care about.
+
+Line 3 & 4:
+
+Python
+    if created:
+        Profile.objects.create(user=instance)
+if created:: We check the switch. Is this a new user?
+
+Profile.objects.create(user=instance):
+
+If Yes: Go to the Profile table. Create a new row.
+
+Link it to instance (Alice).
+
+Result: Alice now has a Profile.
+
+Function 2: The Update (Saving)
+
+Python
+@receiver(post_save, sender=User)
+def save_profile(sender, instance, **kwargs):
+    instance.profile.save()
+Why do we need this one? Sometimes, saving the User should also update the Profile.
+
+Logic: instance.profile.save()
+
+It grabs the user (Alice), finds her profile (.profile), and forces it to save too.
+
+Note: Strictly speaking, for your current app complexity, this second function is less critical than the first one, but it keeps the data in sync (e.g., if you edit the User in the Admin panel, it ensures the Profile stays connected).
+
+Summary
+
+@receiver: The Antenna.
+
+post_save: The Trigger Event.
+
+instance: The specific User (Alice).
+
+created: The Check (Is she new?).
+
+Profile.objects.create: The Action.
+"""
+
 
 
 """

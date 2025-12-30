@@ -84,23 +84,16 @@ class CommentForm(forms.ModelForm):
         # in the view function.
         fields = ['content']
 
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 3, 
+                'placeholder': 'Write a comment...'
+            }),
+        }
 
-class CommunityForm(forms.ModelForm):
-
-    """
-    This is the form for creating a new Community.
-    It's a ModelForm built from our Community model.
-    """
-    class Meta:
-
-        # model = Community: Tells the ModelForm to use our
-        # Community model as its blueprint.
-        model = Community
-
-        # fields = ['name', 'description']: Tells the form to
-        # only show these two fields to the user.
-        # 'created_at' is set automatically by the model.
-        fields = ['name', 'description']
+        # We remove the label because the placeholder is enough
+        labels = {'content': ''}
 
 
 class EditProfileForm(forms.ModelForm):
@@ -127,13 +120,39 @@ class PostForm(forms.ModelForm):
     class Meta:
 
         model = Post
-        fields = ['title', 'content', 'image']
+        fields = ['community', 'title', 'content', 'image']
 
         widgets = {
 
             # This 'widgets' part adds Bootstrap classes to the inputs automatically!
+            'community': forms.Select(attrs={'class': 'form-select'}),
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter title'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'What is on your mind?'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
 
+        }
+
+
+class CommunityForm(forms.ModelForm):
+
+    """
+    This is the form for creating a new Community.
+    It's a ModelForm built from our Community model.
+    """
+    class Meta:
+
+        # model = Community: Tells the ModelForm to use our
+        # Community model as its blueprint.
+        model = Community
+
+        # fields = ['name', 'description']: Tells the form to
+        # only show these two fields to the user.
+        # 'created_at' is set automatically by the model.
+        fields = ['name', 'description']
+
+        widgets = {
+
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Community Name (e.g. Gaming)'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What is this community about?'}),
+            # 'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'url-name (e.g. gaming)'}),
         }

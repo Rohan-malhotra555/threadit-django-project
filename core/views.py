@@ -105,68 +105,68 @@ def signup(request):
     return render(request, 'core/signup.html', context)
 
 
-# Function for community specific search
+# Function for community specific search (older version)
 
-def community_detail(request, community_name):
+# def community_detail(request, community_name):
     
-    # """
-    # Shows details for a specific community and lists its posts.
-    # """
-    # # 1. Find the Community object based on the name from the URL.
-    # #    get_object_or_404 is a handy shortcut:
-    # #    - It tries to get the Community where the 'name' field matches community_name.
-    # #    - If it finds one, it returns the object.
-    # #    - If it finds *none*, it automatically raises a 404 "Page Not Found" error.
-    # # IMPORTANT: the community name is case sensitive.
-    # community = get_object_or_404(Community, name=community_name)
+#     # """
+#     # Shows details for a specific community and lists its posts.
+#     # """
+#     # # 1. Find the Community object based on the name from the URL.
+#     # #    get_object_or_404 is a handy shortcut:
+#     # #    - It tries to get the Community where the 'name' field matches community_name.
+#     # #    - If it finds one, it returns the object.
+#     # #    - If it finds *none*, it automatically raises a 404 "Page Not Found" error.
+#     # # IMPORTANT: the community name is case sensitive.
+#     # community = get_object_or_404(Community, name=community_name)
 
-    # # In order to search in a non case-sensitive way, use __iexact
-    # # community = get_object_or_404(Community, name__iexact=community_name)
+#     # # In order to search in a non case-sensitive way, use __iexact
+#     # # community = get_object_or_404(Community, name__iexact=community_name)
 
-    # # 2. Get all posts that BELONG TO this specific community.
-    # #    We filter the Post objects where the 'community' field (our ForeignKey)
-    # #    is exactly the community object we just found.
-    # #    We also order them by creation date.
-    # posts = Post.objects.filter(community=community).order_by('-created_at')
+#     # # 2. Get all posts that BELONG TO this specific community.
+#     # #    We filter the Post objects where the 'community' field (our ForeignKey)
+#     # #    is exactly the community object we just found.
+#     # #    We also order them by creation date.
+#     # posts = Post.objects.filter(community=community).order_by('-created_at')
 
-    # # 3. Create the context dictionary to pass data to the template.
-    # context = {
-    #     'community': community, # Pass the specific community object
-    #     'posts': posts,         # Pass the filtered list of posts
-    # }
+#     # # 3. Create the context dictionary to pass data to the template.
+#     # context = {
+#     #     'community': community, # Pass the specific community object
+#     #     'posts': posts,         # Pass the filtered list of posts
+#     # }
 
-    # # 4. Render the new template (which we'll create next).
-    # return render(request, 'core/community_detail.html', context)
+#     # # 4. Render the new template (which we'll create next).
+#     # return render(request, 'core/community_detail.html', context)
 
-    """
-    Shows details for a specific community and lists its posts,
-    now with pagination.
-    """
+#     """
+#     Shows details for a specific community and lists its posts,
+#     now with pagination.
+#     """
     
-    # 1. Get the Community object (no change)
-    community = get_object_or_404(Community, name__iexact=community_name)
+#     # 1. Get the Community object (no change)
+#     community = get_object_or_404(Community, name__iexact=community_name)
     
-    # 2. Get the *complete* post list for this community (no change)
-    post_list = Post.objects.filter(community=community).order_by('-created_at')
+#     # 2. Get the *complete* post list for this community (no change)
+#     post_list = Post.objects.filter(community=community).order_by('-created_at')
     
-    # 3. Create a Paginator object for the posts
-    paginator = Paginator(post_list, 5) # Show 5 posts per page
+#     # 3. Create a Paginator object for the posts
+#     paginator = Paginator(post_list, 5) # Show 5 posts per page
 
-    # 4. Get the page number from the URL query parameter
-    page_number = request.GET.get('page')
+#     # 4. Get the page number from the URL query parameter
+#     page_number = request.GET.get('page')
 
-    # 5. Get the Page object for the posts
-    page_obj = paginator.get_page(page_number)
+#     # 5. Get the Page object for the posts
+#     page_obj = paginator.get_page(page_number)
     
-    # 6. Package the context
-    context = {
-        'community': community,
-        # Pass the 'Page' object, not the full list
-        'page_obj': page_obj, 
-    }
+#     # 6. Package the context
+#     context = {
+#         'community': community,
+#         # Pass the 'Page' object, not the full list
+#         'page_obj': page_obj, 
+#     }
     
-    # 7. Render the template (no change)
-    return render(request, 'core/community_detail.html', context)
+#     # 7. Render the template (no change)
+#     return render(request, 'core/community_detail.html', context)
 
 
 # ----------------------------------------------
@@ -240,14 +240,13 @@ def post_detail(request, post_id):
     # 2. Get all comments related to this *one* post.
     #    We filter the Comment model where the 'post' field
     #    matches our 'post' object. We order by the oldest first.
-    comments = Comment.objects.filter(post=post).order_by('created_at')
-    
-    # 3. Create a blank instance of our comment form.
-    #    This will be used to render the "Add a comment" box.
-    comment_form = CommentForm()
+    # comments = Comment.objects.filter(post=post).order_by('created_at')
 
     # 4. Handle the 'POST' request (when a user submits a comment)
     if request.method == 'POST':
+
+        if not request.user.is_authenticated:
+            return redirect('login')
         # This part will ONLY run if the user submits the form.
         # We fill the form instance with the submitted data.
         comment_form = CommentForm(request.POST)
@@ -266,16 +265,21 @@ def post_detail(request, post_id):
             # Redirect back to this *same page* (the post detail page).
             # This is a common pattern to show the new comment.
             return redirect('post_detail', post_id=post.id)
+    
+    else:
+        # 3. Create a blank instance of our comment form.
+        #This will be used to render the "Add a comment" box.
+        comment_form = CommentForm()
             
     # 5. Prepare the context dictionary for the template
     context = {
         'post': post,
-        'comments': comments,
+        # 'comments': comments,
         'comment_form': comment_form,
     }
 
     # 6. Render the template
-    return render(request, 'core/post_detail.html', context)
+    return render(request, 'post_detail.html', context)
 
 
 # The following code is for the VOTING SYSTEM functionality.
@@ -397,71 +401,71 @@ updated lists, displaying the correct score.
 
 
 def profile_view(request, username):
-    # """
-    # Shows a user's profile page, including their posts and comments.
-    # """
+    """
+    Shows a user's profile page, including their posts and comments.
+    """
     
-    # # 1. Get the User object.
-    # # We use get_object_or_404 to find one User where their 'username'
-    # # field exactly matches the 'username' captured from the URL.
-    # # If no user is found, it automatically shows a 404 Page Not Found.
-    # profile_user = get_object_or_404(User, username=username)
+    # 1. Get the User object.
+    # We use get_object_or_404 to find one User where their 'username'
+    # field exactly matches the 'username' captured from the URL.
+    # If no user is found, it automatically shows a 404 Page Not Found.
+    profile_user = get_object_or_404(User, username=username)
     
-    # # 2. Get all posts made by this user, newest first.
-    # # We filter the Post model, looking for all posts where the
-    # # 'author' field (our ForeignKey) is equal to the 'profile_user' object.
-    # posts = Post.objects.filter(author=profile_user).order_by('-created_at')
+    # 2. Get all posts made by this user, newest first.
+    # We filter the Post model, looking for all posts where the
+    # 'author' field (our ForeignKey) is equal to the 'profile_user' object.
+    posts = Post.objects.filter(author=profile_user).order_by('-created_at')
     
-    # # 3. Get all comments made by this user, newest first.
-    # # We do the same thing for comments, filtering by the 'author' field.
-    # comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
+    # 3. Get all comments made by this user, newest first.
+    # We do the same thing for comments, filtering by the 'author' field.
+    comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
     
-    # # 4. Package all our data into a context dictionary.
-    # # Note: We use 'profile_user' to distinguish this from 'user',
-    # # which is the default variable for the *logged-in* user.
-    # context = {
-    #     'profile_user': profile_user,  # The user whose profile we are viewing
-    #     'posts': posts,                # The list of their posts
-    #     'comments': comments,          # The list of their comments
-    # }
+    # 4. Package all our data into a context dictionary.
+    # Note: We use 'profile_user' to distinguish this from 'user',
+    # which is the default variable for the *logged-in* user.
+    context = {
+        'profile_user': profile_user,  # The user whose profile we are viewing
+        'posts': posts,                # The list of their posts
+        'comments': comments,          # The list of their comments
+    }
     
-    # # 5. Render the new template (which we'll create next).
-    # return render(request, 'core/profile.html', context)
+    # 5. Render the new template (which we'll create next).
+    return render(request, 'profile.html', context)
 
     # new paginator part
 
-    """
-    Shows a user's profile page, now with pagination for posts.
-    """
+    # """
+    # Shows a user's profile page, now with pagination for posts.
+    # """
     
-    # 1. Get the User object (no change)
-    profile_user = get_object_or_404(User, username=username)
+    # # 1. Get the User object (no change)
+    # profile_user = get_object_or_404(User, username=username)
     
-    # 2. Get the user's *complete* post list (no change)
-    post_list = Post.objects.filter(author=profile_user).order_by('-created_at')
+    # # 2. Get the user's *complete* post list (no change)
+    # post_list = Post.objects.filter(author=profile_user).order_by('-created_at')
     
-    # 3. Create a Paginator object for the posts
-    paginator = Paginator(post_list, 5) # Show 5 posts per page
+    # # 3. Create a Paginator object for the posts
+    # paginator = Paginator(post_list, 5) # Show 5 posts per page
 
-    # 4. Get the page number from the URL query parameter
-    page_number = request.GET.get('page')
+    # # 4. Get the page number from the URL query parameter
+    # page_number = request.GET.get('page')
 
-    # 5. Get the Page object for the posts
-    posts_page_obj = paginator.get_page(page_number)
+    # # 5. Get the Page object for the posts
+    # posts_page_obj = paginator.get_page(page_number)
     
-    # 6. Get all comments (we won't paginate these for now)
-    comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
+    # # 6. Get all comments (we won't paginate these for now)
+    # comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
     
-    # 7. Package the context
-    context = {
-        'profile_user': profile_user,
-        # Pass the 'Page' object, not the full list
-        'posts_page_obj': posts_page_obj, 
-        'comments': comments,
-    }
+    # # 7. Package the context
+    # context = {
+    #     'profile_user': profile_user,
+    #     # Pass the 'Page' object, not the full list
+    #     'posts_page_obj': posts_page_obj, 
+    #     'comments': comments,
+    # }
     
-    # 8. Render the template (no change)
-    return render(request, 'core/profile.html', context)
+    # # 8. Render the template (no change)
+    # return render(request, 'core/profile.html', context)
 
 
 @login_required # Ensures only logged-in users can run this view
@@ -479,12 +483,18 @@ def create_community(request):
         if form.is_valid():
             # The form is valid! Save the new community to the database.
             # We save it to a variable to get the new object.
-            new_community = form.save()
-            
+            # new_community = form.save()
+            form.save()
             # --- THIS IS THE BEST PRACTICE REDIRECT ---
             # Redirect the user to the detail page for the community
             # they just created.
-            return redirect('community_detail', community_name=new_community.name)
+            # return redirect('community_detail', community_name=new_community.name)
+            return redirect('home')
+        else:
+            # 👇 THIS IS NEW: It will print errors to your terminal
+            print("Form Failed Validation!")
+            print(form.errors)
+
     else:
         # This is a GET request. The user is just visiting the page.
         # Create a new, blank instance of our CommunityForm.
@@ -496,7 +506,7 @@ def create_community(request):
     }
     
     # Render the 'create_community.html' template (we'll make this next)
-    return render(request, 'core/create_community.html', context)
+    return render(request, 'create_community.html', context)
 
 
 @login_required # User must be logged in
@@ -688,8 +698,9 @@ def register(request):
 
         if form.is_valid():
 
-            form.save()
-            return redirect('login')
+            user = form.save()
+            login(request, user) # auto login after signup
+            return redirect('home')
         
     else:
 
@@ -725,3 +736,19 @@ def register(request):
 #     }
 
 #     return render(request, 'create_post.html', context)
+
+
+def community_detail(request, slug):
+
+    community = get_object_or_404(Community, slug=slug)
+
+    posts = Post.objects.filter(community=community).order_by('-created_at')
+
+    context = {
+
+        'community': community,
+        'posts': posts,
+    }
+
+    return render(request, 'community_detail.html', context)
+

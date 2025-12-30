@@ -1,4 +1,83 @@
-{% load static %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card mb-4 bg-light border-primary">
+            <div class="card-body text-center">
+                <h1 class="display-5 text-primary">t/{{ community.name }}</h1>
+                <p class="lead text-muted">{{ community.description }}</p>
+                <a href="{% url 'create_post' %}" class="btn btn-primary btn-sm">Create Post here</a>
+            </div>
+        </div>
+
+        {% for post in posts %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Posted by <span class="fw-bold text-dark">{{ post.author.username }}</span>
+                </small>
+                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+            </div>
+
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ post.title }}</h5>
+                <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="img-fluid rounded mt-2 mb-2" style="width: 100%; height: auto;">
+                {% endif %}
+            </div>
+            
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+
+                <div class="d-flex align-items-center">
+
+                    <form action="{% url 'upvote_post' post.id %}?next={{ request.path }}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-decoration-none p-0">
+                            {% if request.user in post.upvotes.all %}
+                            <i class="bi bi-arrow-up-circle-fill fs-4 text-warning"></i> {% else %}
+                            <i class="bi bi-arrow-up-circle fs-4 text-secondary"></i> {% endif %}
+                        </button>
+                    </form>
+
+                    <span class="mx-2 fw-bold text-dark">{{ post.score }}</span>
+
+                    <form action="{% url 'downvote_post' post.id %}?next={{ request.path }}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-decoration-none p-0">
+                            {% if request.user in post.downvotes.all %}
+                            <i class="bi bi-arrow-down-circle-fill fs-4 text-primary"></i> {% else %}
+                            <i class="bi bi-arrow-down-circle fs-4 text-secondary"></i> {% endif %}
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <a href="{% url 'post_detail' post.id %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                        <i class="bi bi-chat-dots"></i> Comments
+                    </a>
+                </div>
+            </div>
+
+            
+        </div>
+        {% empty %}
+            <div class="alert alert-info text-center">
+                This community is empty. Be the first to post!
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+<!-- {% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -88,7 +167,7 @@
 </html>
 
 
-<!--
+
 &laquo
 
 It's an **HTML character entity**.

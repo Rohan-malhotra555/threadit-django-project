@@ -71,7 +71,9 @@ urlpatterns = [
     #
     # name='community_detail': The unique nickname for this URL pattern.
 
-    path('community/<str:community_name>/', views.community_detail, name='community_detail'),
+    # path('community/<str:community_name>/', views.community_detail, name='community_detail'),
+
+    path('t/<slug:slug>', views.community_detail, name="community_detail"),
 
 # --- ADD THIS NEW LINE for the create new post functionality---
 
@@ -98,7 +100,7 @@ urlpatterns = [
     # Path for the User Profile page
     # This is a dynamic URL that captures a string (the username)
     # e.g., /user/rohan/
-    path('user/<str:username>/', views.profile_view, name='profile'),
+    path('u/<str:username>/', views.profile_view, name='profile'),
 
 
     path('create-community/', views.create_community, name='create_community'),
