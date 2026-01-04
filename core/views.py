@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404 # added get_object_or_404 for the specific community search.
-from .models import Post, Community, Comment  # added Community for the specific community search
+from .models import Post, Community, Comment, Subsriptions  # added Community for the specific community search
 
 from django.contrib.auth import login
-from .forms import SignUpForm, PostForm, CommentForm, CommunityForm,EditProfileForm  # <-- Import our new form
+from .forms import SignUpForm, PostForm, CommentForm, CommunityForm,EditProfileForm, ProfileForm  # <-- Import our new form
 
 # This "decorator" is what we'll use to protect the view
 from django.contrib.auth.decorators import login_required 
@@ -13,6 +13,7 @@ from django.core.paginator import Paginator # for the creation of the pages in h
 
 from django.contrib.auth.forms import UserCreationForm # for the register functionality
 
+from django.db.models import Q # in order to use the OR function.
 
 def home(request):
 
@@ -35,25 +36,49 @@ def home(request):
 
     # 1. Get the list of ALL posts, in order (no change here).
     #    This is the "master list" we will paginate. (descending)
-    post_list = Post.objects.all().order_by('-created_at')
+    
+    # post_list = Post.objects.all().order_by('-created_at')
 
     # 2. Create a Paginator object.
     #    We tell it:
     #    - What list to paginate (post_list)
     #    - How many items per page (e.g., 5)
-    paginator = Paginator(post_list, 5)
+    
+    # paginator = Paginator(post_list, 5)
 
     # 3. Get the page number from the URL's query parameters.
     #    e.g., /?page=1, /?page=2
     #    request.GET.get('page') looks for the 'page' parameter.
-    page_number = request.GET.get('page')
+    
+    # page_number = request.GET.get('page')
 
     # 4. Get the "Page" object for the requested page number.
     #    paginator.get_page() is a safe way to do this.
     #    - If page_number is valid (e.g., 2), it gets Page 2.
     #    - If page_number is not provided (None), it gets Page 1.
     #    - If page_number is invalid (e.g., 999), it gets the last page. 
-    page_obj = paginator.get_page(page_number)
+    
+    # page_obj = paginator.get_page(page_number)
+
+    # Get the top 5 newest communities for the sidebar
+    # .order_by('-created_at') means "Newest first" (descending)
+    # [:5] means "Limit to 5 items" (Slicing)
+    top_communities = Community.objects.order_by('-created_at')[:5]
+
+    feed_obj_list = []
+    explore_list = Post.objects.all().order_by('-created_at')
+
+    if request.user.is_authenticated:
+
+        # .value part means --> filter out only the values for community id and make the (5,) as 5 using flat = true
+        joined_ids = Subsriptions.objects.filter(user=request.user).values_list('community', flat = True)
+
+        if joined_ids:
+
+            feed_obj_list = Post.objects.filter(community__in = joined_ids).order_by('-created_at')
+
+            explore_list = Post.objects.exclude(community__in = joined_ids).order_by('-created_at')
+
 
     # 5. Define the "context".
     #    We no longer pass the *entire* list of posts.
@@ -61,7 +86,10 @@ def home(request):
     #    for the current page, plus all the pagination info.
     context = {
 
-        'page_obj': page_obj,
+        # 'page_obj': page_obj,
+        'top_communities': top_communities,
+        'feed_obj_list': feed_obj_list,
+        'explore_list': explore_list,
     }
 
 
@@ -215,9 +243,23 @@ def create_post(request):
             # Redirect the user back to the homepage
             return redirect('home')
     else:
+
+        initial_data = {}
+
+        community_slug = request.GET.get('community')
+
+        if community_slug:
+
+            community = Community.objects.filter(slug=community_slug).first()
+
+            if community:
+
+                initial_data['community'] = community
+
         # This is a GET request. The user is just visiting the page.
         # Create a new, blank instance of our PostForm.
-        form = PostForm()
+        form = PostForm(initial=initial_data) # can also be (initial={'community': target_community})
+        # form.fields.pop('community') # to pop a field
 
     # Put the form (either blank or with errors) into context
     context = {
@@ -419,7 +461,47 @@ def profile_view(request, username):
     # 3. Get all comments made by this user, newest first.
     # We do the same thing for comments, filtering by the 'author' field.
     comments = Comment.objects.filter(author=profile_user).order_by('-created_at')
-    
+
+    # below is my logic to gather communities subscribed by the specific user
+    # community_ids = Subsriptions.objects.filter(user=profile_user).values_list('community', flat=True)
+
+    # communities = Community.objects.filter(id__in=community_ids)
+
+    #     Community.objects.filter(subscribers__user=profile_user)
+
+    # Community.objects:
+
+    # "Hey Database, we are starting in the Community table. I want to return a list of Communities."
+
+    # .filter(...):
+
+    # "But I don't want all of them. I only want the ones that match a specific condition."
+
+    # subscribers:
+
+    # This is the Reverse Lookup.
+
+    # Django asks: "What is subscribers?"
+
+    # It looks at your models and sees related_name='subscribers' in the Subsriptions model.
+
+    # It realizes: "Ah! You want me to jump from the Community table over to the Subsriptions table."
+
+    # __ (The Double Underscore):
+
+    # This is Django's syntax for "Through" or "Go Inside."
+
+    # It means: "Now that we have jumped into the Subsriptions table, don't stop there. Keep going."
+
+    # user:
+
+    # "Now look at the user column inside that Subscription table."
+
+    # =profile_user:
+
+    # "Does that user match Rohan?"
+    communities = Community.objects.filter(subscribers__user = profile_user)
+
     # 4. Package all our data into a context dictionary.
     # Note: We use 'profile_user' to distinguish this from 'user',
     # which is the default variable for the *logged-in* user.
@@ -427,6 +509,7 @@ def profile_view(request, username):
         'profile_user': profile_user,  # The user whose profile we are viewing
         'posts': posts,                # The list of their posts
         'comments': comments,          # The list of their comments
+        'communities': communities,
     }
     
     # 5. Render the new template (which we'll create next).
@@ -663,11 +746,23 @@ def edit_profile(request):
     if request.method == 'POST':
         # Create a form instance bound to the submitted data
         # AND the logged-in user's instance.
-        form = EditProfileForm(request.POST, instance=request.user)
+
+        # --- LOGIC EXPLANATION: WHY 'INSTANCE'? ---
+        # 1. No Instance: form = ProfileForm(data)
+        #    Django assumes you are creating a BRAND NEW profile (INSERT).
+        #    This fails here because a new profile needs a user, but we didn't provide one.
         
-        if form.is_valid():
+        # 2. With Instance: form = ProfileForm(data, instance=target_object)
+        #    Django knows you want to EDIT that specific object (UPDATE).
+        #    It pulls the existing data (the "file from the cabinet"), applies 
+        #    your changes (the "red pen"), and saves it back to the same ID.
+        user_form = EditProfileForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
             # Save the changes to the existing User object.
-            form.save()
+            user_form.save()
+            profile_form.save()
             
             # Redirect back to the user's profile page.
             # We use the URL name 'profile' and pass the username.
@@ -675,14 +770,16 @@ def edit_profile(request):
     else:
         # This is a GET request.
         # Create the form, pre-filled with the user's current data.
-        form = EditProfileForm(instance=request.user)
-    
+        user_form = EditProfileForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
+
     context = {
-        'form': form,
+        'user_form': user_form,
+        'profile_form': profile_form,
     }
     
     # We will create this template in the next step.
-    return render(request, 'core/edit_profile.html', context)
+    return render(request, 'edit_profile.html', context)
 
 
 
@@ -744,11 +841,85 @@ def community_detail(request, slug):
 
     posts = Post.objects.filter(community=community).order_by('-created_at')
 
+    is_subscribed = False
+
+    if request.user.is_authenticated:
+
+        is_subscribed = Subsriptions.objects.filter(user=request.user, community=community).exists()
+
     context = {
 
         'community': community,
         'posts': posts,
+        'is_subscribed': is_subscribed,
     }
 
     return render(request, 'community_detail.html', context)
 
+
+def search(request):
+
+    query = request.GET.get('q')
+
+    posts = []
+    communities = []
+
+    if query:
+
+        posts = Post.objects.filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )
+
+        communities = Community.objects.filter(name__icontains=query)
+    
+
+    context = {
+
+        'query': query,
+        'posts': posts,
+        'communities': communities,
+    }
+
+    return render(request, 'search.html', context)
+
+
+# The comma , means AND. Django translates this to: "Find a post where the title says 'python' AND the "
+# "content says 'python'." This is too strict! If the word is only in the body, it won't show up.
+
+# The Solution (Q): To say OR, we wrap the conditions in Q() objects and use the pipe | symbol.
+
+# Q(...) | Q(...) means: "Find a post where the title matches OR the content matches."
+
+
+# __contains: (With two underscores) This is a lookup. It translates to SQL LIKE '%word%'. It looks for partial matches (e.g., "cat" finds "caterpillar").
+
+# i (in icontains): This stands for Insensitive (Case-Insensitive).
+
+# Without i: "Apple" does not match "apple".
+
+# With i: "Apple", "apple", "APPLE" all match.
+
+
+@login_required
+def join_community(request, slug):
+
+    community = get_object_or_404(Community, slug=slug)
+
+    subscription = Subsriptions.objects.filter(user=request.user, community=community)
+
+
+    if subscription:
+
+        subscription.delete()
+
+    else:
+
+        Subsriptions.objects.create(user=request.user, community=community)
+
+    
+    return redirect('community_detail', slug=slug)
+
+
+
+
+        

@@ -1,254 +1,110 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <h2 class="mb-4">Recent Discussions</h2>
+<div class="container">
+    <div class="row">
 
-        {% for post in page_obj %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <small class="text-muted">
-                    Posted by <span class="fw-bold text-dark">{{ post.author.username }}</span>
-
-                    {% if post.community %}
-                    in <a href="{% url 'community_detail' post.community.slug %}" class="text-decoration-none">
-                        <span class="badge bg-primary">{{ post.community.name }}</span></a>
-                    {% endif %}
-                </small>
-                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
-            </div>
-
-            <div class="card-body">
-                <h5 class="card-title text-primary">{{ post.title }}</h5>
-                <p class="card-text">{{ post.content|truncatewords:30 }}</p>
-
-                {% if post.image %}
-                <img src="{{ post.image.url }}" class="img-fluid rounded mt-2 mb-2" style="width: 100%; height: auto;">
-                {% endif %}
-            </div>
-
-
-
-            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-
-                <div class="d-flex align-items-center">
-
-                    <form action="{% url 'upvote_post' post.id %}?next={{ request.path }}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link text-decoration-none p-0">
-                            {% if request.user in post.upvotes.all %}
-                            <i class="bi bi-arrow-up-circle-fill fs-4 text-warning"></i> {% else %}
-                            <i class="bi bi-arrow-up-circle fs-4 text-secondary"></i> {% endif %}
-                        </button>
-                    </form>
-
-                    <span class="mx-2 fw-bold text-dark">{{ post.score }}</span>
-
-                    <form action="{% url 'downvote_post' post.id %}?next={{ request.path }}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link text-decoration-none p-0">
-                            {% if request.user in post.downvotes.all %}
-                            <i class="bi bi-arrow-down-circle-fill fs-4 text-primary"></i> {% else %}
-                            <i class="bi bi-arrow-down-circle fs-4 text-secondary"></i> {% endif %}
-                        </button>
-                    </form>
-                </div>
-
-                <div>
-                    <a href="{% url 'post_detail' post.id %}" class="btn btn-outline-primary btn-sm rounded-pill">
-                        <i class="bi bi-chat-dots"></i> Comments
-                    </a>
-                </div>
-            </div>
-
+        <div class="col-lg-8">
             
+            {% if user.is_authenticated and feed_obj_list %}
+                <h2 class="mb-3">Your Feed</h3>
+                
+                {% for post in feed_obj_list %}
+                    <div class="card mb-3 shadow-sm hover-effect">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="{% url 'post_detail' post.id %}" class="text-decoration-none">{{ post.title }}</a>
+                            </h4>
+                            
+                            <p class="card-text mt-2">{{ post.content|truncatewords:50|linebreaks }}</p>
+
+                            {% if post.image %}
+                                <div class="mb-3">
+                                    <img src="{{ post.image.url }}" class="img-fluid rounded border" style="width: 100%; height: auto;">
+                                </div>
+                            {% endif %}
+
+                            <h6 class="card-subtitle mb-2 text-muted small mt-2">
+                                in <a href="{% url 'community_detail' post.community.slug %}"><span class="badge bg-primary">t/{{ post.community.name }}</span></a>
+                                • by u/{{ post.author.username }} • {{ post.created_at|timesince }} ago
+                            </h6>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <hr class="my-5" style="height: 2px; background-color: #e9ecef; border: none;">
+            {% endif %}
+
+
+            <h3 class="mb-3">
+                {% if user.is_authenticated and feed_obj_list %}
+                    More to Explore
+                {% else %}
+                    Home Feed
+                {% endif %}
+            </h3>
+
+            {% for post in explore_list %}
+                <div class="card mb-3 shadow-sm hover-effect">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="{% url 'post_detail' post.id %}" class="text-decoration-none">{{ post.title }}</a>
+                        </h4>
+
+                        <p class="card-text mt-2">{{ post.content|truncatewords:50|linebreaks }}</p>
+
+                        {% if post.image %}
+                            <div class="mb-3">
+                                <img src="{{ post.image.url }}" class="img-fluid rounded border" style="width: 100%; height: auto;">
+                            </div>
+                        {% endif %}
+
+                        <h6 class="card-subtitle mb-2 text-muted small mt-2">
+                            {% if post.community %}
+                                in <a href="{% url 'community_detail' post.community.slug %}"><span class="badge bg-primary">t/{{ post.community.name }}</span></a>
+                            {% else %}
+                                <span class="badge bg-secondary">General</span>
+                            {% endif %}
+
+                            • by u/{{ post.author.username }} • {{ post.created_at|timesince }} ago
+                        </h6>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-info">
+                    No posts found here! Why not <a href="{% url 'create_post' %}">create one</a>?
+                </div>
+            {% endfor %}
+
         </div>
-        {% empty %}
-        <div class="alert alert-info text-center">
-            No posts yet. Be the first to create one!
+
+        <div class="col-lg-4 mt-5">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Top Communities</div>
+                <ul class="list-group list-group-flush">
+                    {% for community in top_communities %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'community_detail' community.slug %}" class="text-decoration-none text-dark">t/{{ community.name }}</a>
+                            <a href="{% url 'community_detail' community.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">View</a>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No communities yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="card-title fw-bold">About ThreadIt</h6>
+                    <p class="card-text small text-muted">The front page of your local internet. Built with Django.</p>
+                    <a href="{% url 'create_post' %}" class="btn btn-primary w-100">Create Post</a>
+                    <a href="{% url 'create_community' %}" class="btn btn-outline-dark w-100 mt-2">Create Community</a>
+                </div>
+            </div>
+
         </div>
-        {% endfor %}
+
     </div>
 </div>
 {% endblock %}
-
-
-
-
-
-<!-- {% load static %}
-
-This is a "doctype" declaration. It's a standard line that tells the
-     web browser "This is a modern HTML5 document."
-<!DOCTYPE html>
-
-This is the root tag. All of your HTML code goes inside this.
-     lang="en" just tells the browser the page is in English.
-<html lang="en">
-
-The <head> tag holds "meta-information" about your page. This is
-     stuff the user doesn't see (like the title in the browser tab).
-<head>
-     This tells the browser to use the UTF-8 character set, which
-         is a standard that includes all emojis and special characters.
-    <meta charset="UTF-8">
-
-     This is a critical line for mobile phones. It tells the phone
-         to set the width of the page to the device's screen width.
-         This is what makes a website "responsive."
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-     This is the text that appears in the browser tab.
-    <title>Welcome to Threadit</title>
-
-     This is an "Internal Style Sheet." We are writing CSS code
-         directly inside our HTML file. Later, we will move this to
-         its own .css file, but this is perfect for now.
-    
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
-</head>
-
- The <body> tag holds all the actual content the user will see
-     (text, images, links, etc.)
-<body>
-
-     A main heading for the page
-    <h1>Welcome to Threadit</h1>
-
-    <div>
-
-        {% if user.is_authenticated %}
-
-            <p> Hello, <a href="{% url 'profile' user.username %}">{{ user.username }}</a>! | 
-            <a href="{% url 'create_post' %}">Create Post</a>
-            | <a href="{% url 'create_community' %}">Create Community</a>
-            | <a href="{% url 'logout' %}">Logout</a></p> 
-
-        {% else %}
-        
-            <p> <a href="{% url 'login' %}">Login</a> | <a href="{% url 'signup'%}">Sign Up</a></p>
-
-        {% endif %}
-
-    </div>
-    
-     <hr> just means "horizontal rule," a simple dividing line.
-    <hr>
-
-    <h2>All Posts</h2>
-
-    
-      DJANGO TEMPLATE LANGUAGE (DTL) STARTS HERE
-      This is not HTML. This is a command for Django.
-      {perc ... perc} is a "Tag." It does something (like a loop or an if-statement).
-      
-      This line says: "Find the 'posts' variable from the context dictionary
-      we passed from the view. Then, loop through every item in that list.
-      For each item, temporarily call it 'post'."
-    
-    {% for post in page_obj %}
-
-        This is a standard HTML div. We give it a class of "post"
-             so it gets the styles we defined in the <style> tag above.
-        <div class="post">
-
-            
-              {{ ... }} is a "Variable Tag." It means "print something."
-              This line tells Django: "Get the current 'post' from the loop
-              and print its 'title' field."
-            
-
-            <div class="vote-container">
-
-                <a href="{% url 'upvote_post' post.id %}" 
-                class="vote-link {% if user.is_authenticated and user in post.upvotes.all %}voted-up{% endif %}">&#x25B2;</a>
-                <p class="score">{{ post.score }}</p>
-                <a href="{% url 'downvote_post' post.id %}" 
-                class="vote-link {% if user.is_authenticated and user in post.downvotes.all %}voted-down{% endif %}">&#x25BC;</a>
-
-            </div>
-
-            <div class="post-content">
-                <h2>
-                    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-                </h2>
-
-                <p class="post-meta">
-                    Posted in <a href=" {% url 'community_detail' post.community.name %}">
-                        
-                        Here, we print the 'post.community'.
-                        Because of your `def __str__` method in models.py,
-                        Django is smart enough to print the *name* of the
-                        community (e.g., "python") instead of a
-                        confusing ID (e.g., "1").
-                        
-                        {{ post.community }}
-                    </a> 
-                    on 
-                    
-                    Here we print the 'created_at' timestamp.
-                    The | is a "Filter." It formats the data.
-                    |date:"F d, Y" tells Django to format the date
-                    like "October 26, 2025".
-                    
-                    :"F d, Y": This is an argument passed to the date filter. It's a format string telling the filter how you want the date to look, using standard codes:
-
-                        F: Full month name (e.g., "October")
-
-                        d: Day of the month, with leading zero (e.g., "05", "26")
-
-                        Y: Four-digit year (e.g., "2025")
-                    
-                    {{ post.created_at|date:"F d, Y" }} 
-                    by <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
-                </p>
-
-                {% if post.image %}
-
-                    <div class="post-image-container">
-                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
-                    </div>
-                
-                {% endif %}
-
-                 This just prints the 'content' field of the post 
-                {% if post.content %}
-
-                    <p>{{ post.content }}</p>
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    
-      This tag tells Django: "The loop ends here."
-      It will repeat everything between here and the {for} tag
-      for every single post in your list.
-    
-    {% endfor %}
-
-    <div class="paginator">
-
-        <span class="step-links">
-
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
-            {% endif %}
-
-            <span class="current-page">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">&raquo; Next</a>
-            {% endif %}
-
-        </span>
-
-    </div>
-
-</body>
-</html> -->

@@ -119,4 +119,10 @@ urlpatterns = [
 
     path('register/', views.register, name='register'),
 
+    path('search/', views.search, name='search'),
+
+    path('t/<slug:slug>/join', views.join_community, name='join_community'),
+
+    # path('create-post/<slug:slug>/', views.create_post_in_community, name='community_specific_post'),
+
 ]

@@ -1,14 +1,38 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="row justify-content-center mt-4">
     <div class="col-md-8">
+        
         <div class="card mb-4 bg-light border-primary">
-            <div class="card-body text-center">
-                <h1 class="display-5 text-primary">t/{{ community.name }}</h1>
-                <p class="lead text-muted">{{ community.description }}</p>
-                <a href="{% url 'create_post' %}" class="btn btn-primary btn-sm">Create Post here</a>
+            <div class="card-body text-center py-4">
+
+                <h1 class="display-5 text-primary mb-2">t/{{ community.name }}</h1>
+
+                <p class="lead text-muted mb-3">{{ community.description }}</p>
+
+                <div class="d-flex flex-column align-items-center gap-2">
+                    
+                    <a href="{% url 'create_post' %}?community={{ community.slug }}" class="btn btn-primary btn-sm px-4">
+                        Create Post here
+                    </a>
+
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'join_community' community.slug %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                class="btn {% if is_subscribed %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm rounded-pill px-4"
+                                style="min-width: 120px;"> {% if is_subscribed %}
+                                Leave Community
+                                {% else %}
+                                Join Community
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                    
+                </div>
+
             </div>
         </div>
 
@@ -16,20 +40,22 @@
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <small class="text-muted">
-                    Posted by <span class="fw-bold text-dark">{{ post.author.username }}</span>
+                    Posted by <a href="{% url 'profile' post.author.username %}" class="text-decoration-none"><span class="fw-bold text-dark">{{ post.author.username }}</span></a>
                 </small>
                 <small class="text-muted">{{ post.created_at|timesince }} ago</small>
             </div>
 
             <div class="card-body">
-                <h5 class="card-title text-primary">{{ post.title }}</h5>
+                <a href="{% url 'post_detail' post.id %}" class="text-decoration-none">
+                    <h5 class="card-title text-primary">{{ post.title }}</h5>
+                </a>
                 <p class="card-text">{{ post.content|truncatewords:30 }}</p>
-                
+
                 {% if post.image %}
-                    <img src="{{ post.image.url }}" class="img-fluid rounded mt-2 mb-2" style="width: 100%; height: auto;">
+                <img src="{{ post.image.url }}" class="img-fluid rounded mt-2 mb-2" style="width: 100%; height: auto;">
                 {% endif %}
             </div>
-            
+
             <div class="card-footer bg-white d-flex justify-content-between align-items-center">
 
                 <div class="d-flex align-items-center">
@@ -62,12 +88,11 @@
                 </div>
             </div>
 
-            
         </div>
         {% empty %}
-            <div class="alert alert-info text-center">
-                This community is empty. Be the first to post!
-            </div>
+        <div class="alert alert-info text-center">
+            This community is empty. Be the first to post!
+        </div>
         {% endfor %}
     </div>
 </div>

@@ -131,6 +131,22 @@ def save_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
+class Subsriptions(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='subscribers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    class Meta:
+
+        # A specific combination of user and community can only exist once.
+        unique_together = ('user', 'community')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.community.name}"
+    
+
 
 
 

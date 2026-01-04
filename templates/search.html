@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Search Results for "{{ query }}"</h2>
+    <hr>
+
+    <h4 class="mt-4 mb-3">Communities</h4>
+    {% if communities %}
+    <div class="row">
+        {% for community in communities %}
+        <div class="col-md-6">
+            <div class="card mb-3 shadow-sm hover-effect">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <h5 class="card-title mb-1">
+                            <a href="{% url 'community_detail' community.slug %}"
+                                class="text-decoration-none text-dark">
+                                r/{{ community.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small mb-0">
+                            {{ community.description|truncatewords:8 }}
+                        </p>
+                    </div>
+
+                    <a href="{% url 'community_detail' community.slug %}" class="btn btn-outline-primary btn-sm ms-3">
+                        Visit
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No communities found.</p>
+    {% endif %}
+
+    <h4 class="mt-4 mb-3">Posts</h4>
+    {% if posts %}
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-6">
+            <div class="card mb-3 shadow-sm hover-effect h-100">
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="card-title">
+                        <a href="{% url 'post_detail' post.id %}" class="text-decoration-none text-dark">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+
+                    <h6 class="card-subtitle mb-2 text-muted small">
+                        {% if post.community %}
+                        in <a href="{% url 'community_detail' post.community.slug %}" class="text-decoration-none">t/{{ post.community.name }}</a>
+                        {% else %}
+                        <span class="badge bg-secondary">General</span>
+                        {% endif %}
+
+                        • by u/{{ post.author.username }}
+                    </h6>
+
+                    <div class="mt-auto pt-2">
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-outline-secondary btn-sm w-100">
+                            Read Thread
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No posts found.</p>
+    {% endif %}
+</div>
+{% endblock %}

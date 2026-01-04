@@ -26,11 +26,12 @@
                         {{ form.content }}
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Community</label>
-                        {{ form.community }}
-                    </div>
-
+                    {% if form.community %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Community</label>
+                            {{ form.community }}
+                        </div>
+                    {% endif %}
 
 
                     <div class="d-grid gap-2">

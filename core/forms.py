@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms    
 
-from .models import Post, Comment, Community # importing Post to be used for the model in the Posting functionality
+from .models import Post, Comment, Community, Profile # importing Post to be used for the model in the Posting functionality
 from django.contrib.auth.models import User
 
 """
@@ -155,4 +155,21 @@ class CommunityForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Community Name (e.g. Gaming)'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What is this community about?'}),
             # 'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'url-name (e.g. gaming)'}),
+        }
+
+
+class ProfileForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Profile
+
+        fields = ['bio', 'location', 'profile_image']
+
+        widgets = {
+
+            # This 'widgets' part adds Bootstrap classes to the inputs automatically!
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3 , 'placeholder': 'Enter bio'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter location'}),
+            'profile_image': forms.FileInput(attrs={'class': 'form-control'}),
         }
