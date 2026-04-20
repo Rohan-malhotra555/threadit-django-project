@@ -113,7 +113,3 @@ To run this project on your local machine, follow these steps:
     * [GitHub](https://github.com/Rohan-malhotra555)
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License.
