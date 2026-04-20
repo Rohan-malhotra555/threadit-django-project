@@ -12,7 +12,7 @@ You can view the live, deployed application here:
 ## 📸 Project Screenshot
 
 
-<img width="959" height="762" alt="image" src="https://github.com/user-attachments/assets/b54edb8e-28e2-44a8-ab79-20fd740fafa9" />
+<img width="1373" height="734" alt="image" src="https://github.com/user-attachments/assets/07ec7dc6-3a98-4691-8b79-4ff0a29995f8" />
 
 
 
