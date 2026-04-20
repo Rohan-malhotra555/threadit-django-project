@@ -241,8 +241,8 @@ if DEBUG:
     }
 
     # 3. Legacy Fallbacks: Ensure old libraries also stay local
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    # DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 else:
     # ---------------------------------------------------------
@@ -266,5 +266,5 @@ else:
     }
 
     # Fallback variables for older third-party libraries
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
