@@ -14,50 +14,62 @@ from pathlib import Path
 
 import os
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Path(__file__) finds settings.py. .parent goes up to threadit/.
+# .parent goes up to the root folder. Now Django knows where db.sqlite3 
+# and manage.py are, no matter whose computer it's on.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-yz4%$d!bb0z$p@2_&%_8+p7!hudnn2ub@gez*01j@!5%m63)c1')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True # this was the previous state
-DEBUG = 'RENDER' not in os.environ
+DEBUG = os.environ.get('DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 # Application definition
 
 INSTALLED_APPS = [
+    # CUSTOM APPS (we create these) 
     'core',  # newly added app for main 'core' logic
     
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # DJANGO APPS (built-in apps that come with Django)
+    'django.contrib.admin',      # The Admin Panel
+    'django.contrib.auth',       # Login/Signup System
+    'django.contrib.contenttypes', # Allows generic model relations. Tracks all the models in your project and how they relate to each other.
+    'django.contrib.sessions',   # Tracking user login state
+    'django.contrib.messages',   # The "Post Created!" popups
+    'django.contrib.staticfiles', # Handling CSS/Images
 
+    # THIRD-PARTY APPS (installed via pip (pip installs packages))
     'cloudinary_storage',
     'cloudinary',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+MIDDLEWARE = [ # these are like "filters" that process requests and responses globally.
+    #  They can do things like check if a user is logged in, handle sessions, protect against CSRF attacks, etc. Each middleware component is executed in order for every request/response.
+    # work from top to bottom, each one can modify the request before it reaches the view, and modify the response before it goes back to the browser. For example, SecurityMiddleware checks if the request is secure (HTTPS) and can redirect to HTTPS if not.
+    #  SessionMiddleware manages user sessions (like remembering who is logged in). CsrfViewMiddleware protects against Cross-Site Request Forgery attacks by checking for a special token in POST requests. 
+    # AuthenticationMiddleware attaches the user information to the request so you can access request.user in your views. MessageMiddleware allows you to use Django's messaging framework for pop-up messages. XFrameOptionsMiddleware adds security headers to prevent clickjacking attacks.
+    # these check if the request is secure, manages sessions, handles CSRF protection, etc.
+    'django.middleware.security.SecurityMiddleware',  # 1. Is this HTTPS?
+    'whitenoise.middleware.WhiteNoiseMiddleware', # 2. Serve static files efficiently in production
+    'django.contrib.sessions.middleware.SessionMiddleware', # 2. Who is this user? (reads cookie)
+    'django.middleware.common.CommonMiddleware', # 3. Common tasks (e.g., append slash to URLs, handle 404s gracefully)
+    'django.middleware.csrf.CsrfViewMiddleware', # 3. Is this form submission safe and legit, verification of csrf token happens. 
+    'django.contrib.auth.middleware.AuthenticationMiddleware',# 4. Attach 'request.user', basically attaches the logged in user info to the request so you can access it in your views.
+    'django.contrib.messages.middleware.MessageMiddleware', # 5. Checks for any messages (like "Post Created!") that need to be displayed to the user and makes them available in the response. 
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # 6. Protect against clickjacking which is a type of attack where malicious sites try to trick users into clicking on something different from what they perceive.
 ]
 
 ROOT_URLCONF = 'threadit.urls'
@@ -93,19 +105,19 @@ DATABASES = {
 
 # This is the "production switch" for your database.
 # It looks for the Neon database URL in Render's "key safe".
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
-    # If it finds the Neon key, it uses dj-database-url (the "translator")
-    # to configure your live PostgreSQL database.
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True
-    )
+# DATABASE_URL = os.environ.get('DATABASE_URL')
+# if DATABASE_URL:
+#     # If it finds the Neon key, it uses dj-database-url (the "translator")
+#     # to configure your live PostgreSQL database.
+#     DATABASES['default'] = dj_database_url.config(
+#         conn_max_age=600,
+#         ssl_require=True
+    # )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS = [ # these help make passwords more secure by enforcing certain rules like minimum length, complexity, etc. 
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -136,7 +148,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -157,27 +169,32 @@ LOGIN_URL = 'login' # written for the redirection used by the login_required dec
 STATIC_URL = 'static/'
 
 # This tells Django to look for a folder named "static"
-# in the main project directory.
+# in the main project directory. (Django automatically looks
+# for "static" folders inside each app as well.) 
+
+# used to find static files during development (when DEBUG=True).
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 
 # This automatically finds your live app's URL (e.g., threadit-app.onrender.com)
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+# if RENDER_EXTERNAL_HOSTNAME:
+#     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# We also add 'localhost' so you can still work on your laptop
-ALLOWED_HOSTS.append('127.0.0.1')
+# # We also add 'localhost' so you can still work on your laptop
+# ALLOWED_HOSTS.append('127.0.0.1')
 
 
 # This is the "Shipping Crate" folder.
 # 'collectstatic' will copy all CSS/JS files into this one folder
 # for the production server (gunicorn) to use.
+
+# hence used to collect static files for production (when DEBUG=False).
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- MEDIA FILES (User Uploaded) CONFIGURATION ---
 
@@ -196,5 +213,58 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # *only* when we are in production (when DEBUG is False).
 # When DEBUG is True (on your laptop), it will still use
 # your local 'media' folder, which is perfect for testing.
-if not DEBUG:
+# if not DEBUG:
+    # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+if DEBUG:
+    # ---------------------------------------------------------
+    # TRACK A: LOCAL DEVELOPMENT (Your Mac)
+    # Triggered because your local .env file says DEBUG=True
+    # ---------------------------------------------------------
+    
+    # 1. Save data to the local file
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    
+    # 2. Save media and static files to the local Mac folders
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    # 3. Legacy Fallbacks: Ensure old libraries also stay local
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+else:
+    # ---------------------------------------------------------
+    # TRACK B: PRODUCTION (Render Cloud)
+    # Triggered because Render's dashboard will say DEBUG=False
+    # ---------------------------------------------------------
+    
+    # 1. Save data to Neon PostgreSQL (Intercepts DATABASE_URL)
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600)
+    }
+    
+    # 2. Save media to Cloudinary, serve static files via WhiteNoise
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+    # Fallback variables for older third-party libraries
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

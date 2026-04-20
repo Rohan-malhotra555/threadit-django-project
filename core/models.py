@@ -62,6 +62,20 @@ class Post(models.Model):
     # Reverse name: post_upvotes (the related_name you specified, which gets attached to the User model).
     # post.upvotes.all() → “Who liked this post?”
     # user.post_upvotes.all() → “Which posts did this user like?”
+
+
+
+    # VERY IMPORTANT NOTE REGARDING ACCESSING FIELDS VIA FOREIGNKEY AND MANYTOMANYFIELDS:
+
+    # we can use post.author.username to get the username of the author of the post, because:
+    # it is a single object, so we can access its fields directly using dot notation.
+
+    # but, for upvotes and downvotes, they are ManyToManyFields, so they can have multiple users associated with them.
+    # therefore, we cannot access a single field directly using dot notation.
+    # instead, we have to use the .all() method to get a queryset of all related users, 
+    # and then we can iterate over that queryset or use other queryset methods to access individual user fields
+    
+    
     upvotes = models.ManyToManyField(User, related_name='post_upvotes', blank=True)
 
     # We do the same for downvotes.

@@ -15,6 +15,8 @@ from django.contrib.auth.forms import UserCreationForm # for the register functi
 
 from django.db.models import Q # in order to use the OR function.
 
+from django.contrib import messages 
+
 def home(request):
 
     # 1. Get all the Post objects from the database
@@ -239,6 +241,8 @@ def create_post(request):
             
             # Now, save the completed object to the database.
             new_post.save()
+
+            messages.success(request, 'Your post has been published successfully!')
             
             # Redirect the user back to the homepage
             return redirect('home')
@@ -658,6 +662,8 @@ def delete_post(request, post_id):
         # The user has confirmed the deletion. Delete the post.
         post.delete()
         
+        messages.success(request, 'Post deleted successfully.')
+
         # Redirect back to the homepage
         return redirect('home')
     
@@ -675,6 +681,7 @@ def edit_comment(request, comment_id):
     """
     # 1. Get the specific comment object
     comment = get_object_or_404(Comment, id=comment_id)
+    post = comment.post
     
     # 2. Security Check: Is the logged-in user the author?
     if request.user != comment.author:
@@ -701,10 +708,11 @@ def edit_comment(request, comment_id):
     context = {
         'form': form,
         'comment': comment, # Pass the comment for the template
+        'post': post,
     }
     
     # We will need to create this new template
-    return render(request, 'core/edit_comment.html', context)
+    return render(request, 'edit_comment.html', context)
 
 
 @login_required
@@ -763,6 +771,8 @@ def edit_profile(request):
             # Save the changes to the existing User object.
             user_form.save()
             profile_form.save()
+
+            messages.success(request, 'Your profile has been updated successfully!')
             
             # Redirect back to the user's profile page.
             # We use the URL name 'profile' and pass the username.
@@ -911,10 +921,12 @@ def join_community(request, slug):
     if subscription:
 
         subscription.delete()
+        messages.warning(request, f'You have left t/{community.name}')
 
     else:
 
         Subsriptions.objects.create(user=request.user, community=community)
+        messages.success(request, f'Welcome to t/{community.name}')
 
     
     return redirect('community_detail', slug=slug)
