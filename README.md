@@ -110,6 +110,5 @@ To run this project on your local machine, follow these steps:
 
 * **Rohan Malhotra**
     * [LinkedIn](https://www.linkedin.com/in/rohan-malhotra-0b6327251/)
-    * [GitHub](https://github.com/Rohan-malhotra555)
 
 ---
