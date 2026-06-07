@@ -5,7 +5,7 @@ A full-stack content aggregation and discussion platform built from the ground u
 ## 🚀 Live Demo
 
 You can view the live, deployed application here:
-**[https://rohan-threadit.onrender.com](https://rohan-threadit.onrender.com)**
+**[https://rohan-threadit.onrender.com](https://threadit-django-project.onrender.com)**
 
 ---
 
